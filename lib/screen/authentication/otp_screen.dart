@@ -89,45 +89,77 @@ class _OTPScreenState extends State<OTPScreen> {
         return true;
       },
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 82, 165, 233),
-        body: Container(
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "CODE",
-                style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold),
-              ),
-              Text("Verification",
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(
-                height: 40.0,
-              ),
-              const Text(
-                "Enter the verification code send at",
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(
-                height: 20.0,
-              ),
-              OtpTextField(
-                numberOfFields: 6,
-                fillColor: Colors.black.withOpacity(0.1),
-                filled: true,
-                keyboardType: TextInputType.number,
-                onSubmit: (code) {
-                  progressDialog.show();
-                  phoneCredential(context, code, null);
-                },
-              ),
-              const SizedBox(
-                height: 20.0,
-              ),
-            ],
+        backgroundColor: Colors.orange,
+        body: CustomPaint(
+          painter: CurvePainter(),
+          child: Container(
+            padding: const EdgeInsets.all(30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "CODE",
+                  style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold),
+                ),
+                Text("Verification",
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(
+                  height: 40.0,
+                ),
+                const Text(
+                  "Enter the verification code send at",
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                OtpTextField(
+                  numberOfFields: 6,
+                  fillColor: Colors.black.withOpacity(0.1),
+                  filled: true,
+                  keyboardType: TextInputType.number,
+                  onSubmit: (code) {
+                    progressDialog.show();
+                    phoneCredential(context, code, null);
+                  },
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+}
+
+class CurvePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint();
+    paint.color = const Color.fromARGB(255, 82, 165, 233);
+    paint.style = PaintingStyle.fill;
+
+    var path = Path();
+    path.lineTo(0, size.height * 0.2);
+    path.quadraticBezierTo(size.width * 0.25, size.height * 0.25,
+        size.width * 0.5, size.height * 0.15);
+    path.quadraticBezierTo(
+        size.width * 0.75, size.height * 0.06, size.width, size.height * 0.2);
+    path.lineTo(size.width, size.height * 0.95);
+    path.quadraticBezierTo(size.width * 0.75, size.height * .9,
+        size.width * 0.5, size.height * .95);
+    path.quadraticBezierTo(
+        size.width * 0.25, size.height * 1, 0, size.height * 0.9);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }

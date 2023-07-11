@@ -64,11 +64,15 @@ class _PreviousOrderState extends State<PreviousOrder> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(
-        child: SizedBox(
-          width: 100,
-          height: 150,
-          child: Image.asset('assets/images/loading.gif'),
+      return SizedBox(
+        width:
+            double.infinity, // Set width to cover the whole screen horizontally
+        height:
+            double.infinity, // Set height to cover the whole screen vertically
+        child: Center(
+          child: SizedBox(
+            child: Image.asset('assets/images/loading.gif'),
+          ),
         ),
       );
     } else {
@@ -109,9 +113,12 @@ class _PreviousOrderState extends State<PreviousOrder> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text("Services"),
-                          Text(
-                            lists[index]["Services"],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          Flexible(
+                            child: Text(
+                              lists[index]["Services"],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ],
                       ),
@@ -129,9 +136,12 @@ class _PreviousOrderState extends State<PreviousOrder> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text("Address"),
-                          Text(
-                            lists[index]["Address"],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          Flexible(
+                            child: Text(
+                              lists[index]["Address"],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ],
                       ),

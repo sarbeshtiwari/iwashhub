@@ -14,7 +14,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        backgroundColor: const Color.fromARGB(255, 14, 35, 228),
         centerTitle: true,
         title: const Text(
           "Subscriptions",
@@ -22,7 +21,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         ),
       ),
       body: ListView(children: [
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         Card(
@@ -33,14 +32,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             ),
           ),
           elevation: 15,
-          color: Color.fromARGB(255, 120, 213, 249),
+          color: const Color.fromARGB(255, 120, 213, 249),
           child: Container(
             height: 130,
             child: ListTile(
-              title: Text('Student Laundry'),
-              subtitle: Text('For ₹8/cloth \n Dry Clean and Washing '),
-              leading: Icon(Icons.card_membership),
-              trailing: Text('Only at ₹999'),
+              title: const Text('Student Laundry'),
+              subtitle: const Text('For ₹8/cloth \n Dry Clean and Washing '),
+              leading: const Icon(Icons.card_membership),
+              trailing: const Text('Only at ₹999'),
               onTap: () => {},
             ),
           ),
@@ -91,14 +90,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         ),
         const Divider(),
         Container(
-          padding: const EdgeInsets.all(16),
-          child: const Text(
-            'To Activate the Subscription \n visit our nearest Store \n  (or Contact: 8948310077)',
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                textBaseline: TextBaseline.ideographic),
-            textAlign: TextAlign.center,
+          alignment: Alignment.bottomCenter,
+          child: const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'To Activate the Subscription \n visit our nearest Store \n  (or Contact: 8948310077)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ]),

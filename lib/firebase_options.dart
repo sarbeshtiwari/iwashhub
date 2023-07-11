@@ -65,10 +65,8 @@ class DefaultFirebaseOptions {
     projectId: 'iwash-d6737',
     databaseURL: 'https://iwash-d6737-default-rtdb.firebaseio.com',
     storageBucket: 'iwash-d6737.appspot.com',
-    androidClientId:
-        '822918700528-v2sptvr253kjqbv8bud96m2lctirsq3g.apps.googleusercontent.com',
-    iosClientId:
-        '822918700528-535b4u3tjnsis9fv5gksepkq8qb2605g.apps.googleusercontent.com',
+    androidClientId: '822918700528-v2sptvr253kjqbv8bud96m2lctirsq3g.apps.googleusercontent.com',
+    iosClientId: '822918700528-535b4u3tjnsis9fv5gksepkq8qb2605g.apps.googleusercontent.com',
     iosBundleId: 'com.example.iwash',
   );
 }

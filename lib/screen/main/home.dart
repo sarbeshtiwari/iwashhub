@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/services.dart';
+import 'package:iwash/screen/screen2/subscriptions_screen.dart';
+import 'package:iwash/services/feedback.dart';
 // import 'package:get/get.dart';
 
 import 'package:iwash/screen/screen2/notification_screen.dart';
@@ -58,12 +60,9 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        const snackBar = SnackBar(
-          content: Text('Bye Bye!'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        final submitted = await showFeedbackForm(context);
         SystemNavigator.pop();
-        return true;
+        return submitted;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -81,32 +80,35 @@ class _HomeState extends State<Home> {
               },
             )
           ],
-          flexibleSpace: Row(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 35),
-                child: Image.asset(
-                  'assets/images/log.png',
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  height: MediaQuery.of(context).size.height * 0.1,
+          flexibleSpace: Padding(
+            padding: EdgeInsets.only(left: MediaQuery.of(context).padding.left),
+            child: Row(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 15),
+                  child: Image.asset(
+                    'assets/images/log.png',
+                    width: MediaQuery.of(context).size.width * 0.2,
+                    height: MediaQuery.of(context).size.height * 0.1,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 35),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Hello, $username",
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                        fontSize: 18,
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 35),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Hello, $username",
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         body: Stack(
@@ -222,18 +224,6 @@ class _HomeState extends State<Home> {
                         children: [
                           IconButton(
                             onPressed: () => onButtonPressed(
-                              'Dry_clean_household.json',
-                            ),
-                            icon: Image.asset('assets/images/premium.png'),
-                            iconSize: 50,
-                          ),
-                          const Text('Home Clean'),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          IconButton(
-                            onPressed: () => onButtonPressed(
                               'Laundry.json',
                             ),
                             icon: Image.asset('assets/images/wash-fold.png'),
@@ -252,6 +242,78 @@ class _HomeState extends State<Home> {
                             iconSize: 48,
                           ),
                           const Text('Wash & Iron'),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(10),
+                                      ),
+                                    ),
+                                    title: const Text('Dry Clean',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    content: SingleChildScrollView(
+                                      child: ListBody(
+                                        children: <Widget>[
+                                          Card(
+                                            child: ListTile(
+                                              onTap: () => onButtonPressed(
+                                                  'Dry_clean_female.json'),
+                                              title: const Text(
+                                                  'Female(Heavy Cloths)'),
+                                            ),
+                                          ),
+                                          Card(
+                                            child: ListTile(
+                                              onTap: () => onButtonPressed(
+                                                  'Dry_clean_male.json'),
+                                              title: const Text(
+                                                  'Male(Heavy Cloths)'),
+                                            ),
+                                          ),
+                                          Card(
+                                            child: ListTile(
+                                              onTap: () => onButtonPressed(
+                                                  'Dry_clean_men.json'),
+                                              title: const Text(
+                                                  'Men(Light Cloths)'),
+                                            ),
+                                          ),
+                                          Card(
+                                            child: ListTile(
+                                              onTap: () => onButtonPressed(
+                                                  'Dry_clean_women.json'),
+                                              title: const Text(
+                                                  'Female(Light Cloths)'),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: const Text('Close'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: Image.asset('assets/images/dry-cleaning.png'),
+                            iconSize: 50,
+                          ),
+                          const Text('Dry Clean'),
                         ],
                       ),
                     ],
@@ -281,74 +343,13 @@ class _HomeState extends State<Home> {
                         Column(
                           children: [
                             IconButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(10),
-                                        ),
-                                      ),
-                                      title: const Text('Dry Clean',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      content: SingleChildScrollView(
-                                        child: ListBody(
-                                          children: <Widget>[
-                                            Card(
-                                              child: ListTile(
-                                                onTap: () => onButtonPressed(
-                                                    'Dry_clean_female.json'),
-                                                title: const Text(
-                                                    'Female(Heavy Cloths)'),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: ListTile(
-                                                onTap: () => onButtonPressed(
-                                                    'Dry_clean_male.json'),
-                                                title: const Text(
-                                                    'Male(Heavy Cloths)'),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: ListTile(
-                                                onTap: () => onButtonPressed(
-                                                    'Dry_clean_men.json'),
-                                                title: const Text(
-                                                    'Men(Light Cloths)'),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: ListTile(
-                                                onTap: () => onButtonPressed(
-                                                    'Dry_clean_women.json'),
-                                                title: const Text(
-                                                    'Female(Light Cloths)'),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          child: const Text('Close'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              icon:
-                                  Image.asset('assets/images/dry-cleaning.png'),
+                              onPressed: () => onButtonPressed(
+                                'Dry_clean_household.json',
+                              ),
+                              icon: Image.asset('assets/images/premium.png'),
                               iconSize: 50,
                             ),
-                            const Text('Dry Clean'),
+                            const Text('Home Clean'),
                           ],
                         ),
                         Column(
@@ -423,35 +424,62 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, BookingScreen.id);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50, vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Book Now",
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        // decoration: BoxDecoration(
+                        //   borderRadius: BorderRadius.circular(30),
+                        // ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, SubscriptionScreen.id);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 20),
+                            //shape: CircleBorder(),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                          ),
+                          child: const Text(
+                            "Subscribe",
                             style: TextStyle(fontSize: 20),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 10),
+                      Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, BookingScreen.id);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 20),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            backgroundColor: Colors.orange,
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Book Now",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                )
               ],
             ),
           ],
@@ -460,17 +488,14 @@ class _HomeState extends State<Home> {
           onPressed: () {
             Navigator.pushNamed(context, ChatbotApp.id);
           },
-          child: const Stack(
-            alignment: Alignment.center,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          child: Stack(
             children: [
-              SizedBox(), // Add an empty SizedBox to maintain the size of the FloatingActionButton
-              Text(
-                'Chat Bot',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
+              Image.asset(
+                'assets/images/chatbot.png',
+                width: 54,
+                height: 54,
               ),
             ],
           ),

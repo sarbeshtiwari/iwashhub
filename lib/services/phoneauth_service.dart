@@ -7,6 +7,7 @@ import '../screen/authentication/otp_screen.dart';
 
 class PhoneAuthService {
   FirebaseAuth auth = FirebaseAuth.instance;
+  
 
   Future<void> verifyPhoneNumber(BuildContext context, number) async {
     final PhoneVerificationCompleted verificationCompleted =
@@ -58,6 +59,7 @@ class PhoneAuthService {
           verificationFailed: verificationFailed,
           codeSent: codeSent,
           timeout: const Duration(seconds: 60),
+          
           codeAutoRetrievalTimeout: (String verificationId) {
             //print(verificationId);
           });
@@ -65,4 +67,6 @@ class PhoneAuthService {
       //print('Error ${e.toString()}');
     }
   }
+  
 }
+

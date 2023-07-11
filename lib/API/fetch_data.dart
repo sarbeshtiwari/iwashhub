@@ -97,11 +97,15 @@ class _FetchDataState extends State<FetchData> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(
-        child: SizedBox(
-          width: 100,
-          height: 150,
-          child: Image.asset('assets/images/loading.gif'),
+      return SizedBox(
+        width:
+            double.infinity, // Set width to cover the whole screen horizontally
+        height:
+            double.infinity, // Set height to cover the whole screen vertically
+        child: Center(
+          child: SizedBox(
+            child: Image.asset('assets/images/loading.gif'),
+          ),
         ),
       );
     } else {

@@ -89,9 +89,10 @@ class _OrderConfirmState extends State<OrderConfirm> {
       shopname = userData.data()!['Name'];
       shopphoneNumber = userData.data()!['Phone Number'];
     });
+    const phoneNumber = 8707828835;
     sendSMS(
         'Thanks for making enquiry for iwashhub franchisee business. Get connected with us to know more. 789545 Call 6394131552IWASHB',
-        shopphoneNumber);
+        [shopphoneNumber, phoneNumber.toString()]);
   }
 
   //  String? fcmToken = await FirebaseMessaging.instance.getToken();
@@ -129,7 +130,7 @@ class _OrderConfirmState extends State<OrderConfirm> {
     );
   }
 
-  void sendSMS(String message, shopphoneNumber) async {
+  void sendSMS(String message, List<String> recivers) async {
     // Set the base URL
     String url = 'http://smsw.co.in/API/WebSMS/Http/v1.0a/index.php';
     // Set the query parameters
@@ -137,7 +138,7 @@ class _OrderConfirmState extends State<OrderConfirm> {
       'username': 'Asepsis',
       'password': '4d436c-78a08',
       'sender': 'IWASHB',
-      'to': shopphoneNumber,
+      'to': recivers.join(','),
       'message': message,
       'reqid': '1',
       'format': '{json|text}',
@@ -154,7 +155,6 @@ class _OrderConfirmState extends State<OrderConfirm> {
     // Check the response
     if (response.statusCode == 200) {
       print('SMS sent successfully');
-      print(shopphoneNumber);
     } else {
       print('Failed to send SMS: ${response.body}');
     }
@@ -167,11 +167,15 @@ class _OrderConfirmState extends State<OrderConfirm> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(
-        child: SizedBox(
-          width: 100,
-          height: 150,
-          child: Image.asset('assets/images/loading.gif'),
+      return SizedBox(
+        width:
+            double.infinity, // Set width to cover the whole screen horizontally
+        height:
+            double.infinity, // Set height to cover the whole screen vertically
+        child: Center(
+          child: SizedBox(
+            child: Image.asset('assets/images/loading.gif'),
+          ),
         ),
       );
     } else {

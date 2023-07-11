@@ -90,8 +90,6 @@ class _PriceScreenState extends State<PriceScreen> {
             double.infinity, // Set height to cover the whole screen vertically
         child: Center(
           child: SizedBox(
-            width: 100,
-            height: 150,
             child: Image.asset('assets/images/loading.gif'),
           ),
         ),

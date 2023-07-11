@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:iwash/screen/screen2/coupons.dart';
+
 import 'package:iwash/screen/screen2/help_support.dart';
 import 'package:iwash/screen/screen2/previous_order.dart';
 import 'package:iwash/screen/screen2/settings_screen.dart';
 import 'package:iwash/screen/screen2/subscriptions_screen.dart';
 import 'package:iwash/services/Chat.dart';
 
+import '../../services/feedback.dart';
 import '../../widgets/Bootombar.dart';
 import '../screen2/franchise_screen.dart';
 import 'home.dart';
@@ -133,12 +134,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             //   children: <Widget>[
                             //     IconButton(
                             //       icon: const Icon(Icons.wallet_giftcard),
-                            //       onPressed: () => {
-                            //         Navigator.pushNamed(context, Coupons.id),
-                            //       },
+                            //       onPressed: () => showFeedbackForm(context),
                             //     ),
                             //     const Text(
-                            //       'Gift Cards',
+                            //       'Feedback',
                             //       style: TextStyle(fontWeight: FontWeight.bold),
                             //     )
                             //   ],
@@ -197,6 +196,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Navigator.pushNamed(context, FranchiseScreen.id),
                     },
                   ),
+                  const Divider(),
+                  ListTile(
+                    title: const Text('Feedback'),
+                    leading: const Icon(Icons.feedback),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Color.fromARGB(255, 82, 108, 255),
+                    ),
+                    onTap: () => showFeedbackForm(context),
+                  ),
+                  const Divider(),
                 ],
               ),
             ),
@@ -206,17 +216,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () {
             Navigator.pushNamed(context, ChatbotApp.id);
           },
-          child: const Stack(
-            alignment: Alignment.center,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          child: Stack(
             children: [
-              SizedBox(), // Add an empty SizedBox to maintain the size of the FloatingActionButton
-              Text(
-                'Chat Bot',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
+              Image.asset(
+                'assets/images/chatbot.png',
+                width: 54,
+                height: 54,
               ),
             ],
           ),

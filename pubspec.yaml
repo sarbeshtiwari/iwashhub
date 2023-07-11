@@ -62,6 +62,7 @@ dependencies:
   image_picker: ^1.0.0
   getwidget: ^3.1.1
   firebase_messaging: any
+  url_launcher: ^6.1.12
   
 
   
@@ -100,18 +101,17 @@ flutter:
     - assets/images/shoes-cleaning.png
     - assets/images/bag.png
     - assets/images/shirt.png
-    - assets/images/loading.gif
     - assets/images/log.png
-    - assets/images/franchise.png
     - assets/images/add.png
-    - assets/images/order.gif
-    - assets/images/chatbot.jpg
     
+    - assets/images/loading.gif
+    - assets/images/order.gif
+    - assets/images/chatbot.png
     - assets/images/appopening.gif
-    - assets/chatbot/chatbot.json
     - assets/images/onboarding/1.gif
     - assets/images/onboarding/2.gif
     - assets/images/onboarding/3.gif
+    
     - assets/privacypolicy.txt
     - assets/Terms&conditions.txt
 
@@ -126,17 +126,18 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
+  fonts:
+    - family: Muller
+      fonts:
+        - asset: assets/fonts/Muller/Non-commercial/Muller/TTF/Muller-Trial-Black.ttf
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+          weight: 700
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DM_Sans/DMSans-Regular.ttf
+  
+  
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

@@ -222,6 +222,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   TextField(
                     controller: _emailController,
                     decoration: const InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
                   ),
                 ],
               ),

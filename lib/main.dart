@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:iwash/screen/screen2/coupons.dart';
 import 'package:iwash/screen/screen2/previous_order.dart';
 import 'package:iwash/services/Chat.dart';
 
@@ -90,7 +89,6 @@ class MyApp extends StatelessWidget {
                     selectedStore: '',
                   ),
               PreviousOrder.id: (context) => const PreviousOrder(),
-              Coupons.id: (context) => const Coupons(),
 
               //Inititials
               LoginScreen.id: (context) => const LoginScreen(),

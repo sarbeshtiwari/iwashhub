@@ -4,6 +4,8 @@ import 'package:iwash/screen/authentication/signup_screen.dart';
 import 'package:iwash/screen/screen2/privacy_policy.dart';
 import 'package:iwash/screen/screen2/terms_condition.dart';
 
+import '../../services/feedback.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
   static const String id = "SettingsScreen";
@@ -18,7 +20,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        backgroundColor: const Color.fromARGB(255, 14, 35, 228),
         centerTitle: true,
         title: const Text(
           "Settings",
@@ -44,35 +45,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: () => {Navigator.pushNamed(context, TermsCondition.id)},
           ),
+
           const Divider(),
-          ListTile(
-            title: const Text('Sign Out'),
-            trailing: const Icon(
-              Icons.chevron_right,
-              color: Color.fromARGB(255, 82, 108, 255),
-            ),
-            onTap: () => {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Alert'),
-                    content: const Text('Are you Sure'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          FirebaseAuth.instance.signOut();
-                          Navigator.pushNamed(context, SignUpScreen.id);
-                        },
-                        child: const Text('Yes'),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            },
-          ),
+          // ListTile(
+          //   title: const Text('Sign Out'),
+          //   trailing: const Icon(
+          //     Icons.chevron_right,
+          //     color: Color.fromARGB(255, 82, 108, 255),
+          //   ),
+          //   onTap: () => {
+          //     showDialog(
+          //       context: context,
+          //       builder: (BuildContext context) {
+          //         return AlertDialog(
+          //           title: const Text('Alert'),
+          //           content: const Text('Are you Sure'),
+          //           actions: [
+          //             TextButton(
+          //               onPressed: () {
+          //                 Navigator.of(context).pop();
+          //                 FirebaseAuth.instance.signOut();
+          //                 Navigator.pushNamed(context, SignUpScreen.id);
+          //               },
+          //               child: const Text('Yes'),
+          //             ),
+          //           ],
+          //         );
+          //       },
+          //     ),
+          //   },
+          // ),
+          Center(
+              child: ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Alert'),
+                          content: const Text('Are you Sure'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                
+                                Navigator.of(context).pop();
+                                FirebaseAuth.instance.signOut();
+                                Navigator.pushNamed(context, SignUpScreen.id);
+                              },
+                              child: const Text('Yes'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: Text("Sign Out")))
         ],
       ),
     );

@@ -10,7 +10,6 @@ class HelpSupport extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           elevation: 1,
-          backgroundColor: const Color.fromARGB(255, 14, 35, 228),
           centerTitle: true,
           title: const Text(
             "Help & support",
