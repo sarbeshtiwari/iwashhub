@@ -1,18 +1,15 @@
 // ignore_for_file: prefer_final_fields, use_build_context_synchronously, non_constant_identifier_names, unnecessary_brace_in_string_interps, prefer_const_constructors_in_immutables, use_key_in_widget_constructors, library_private_types_in_public_api, depend_on_referenced_packages, unused_local_variable, no_leading_underscores_for_local_identifiers, prefer_typing_uninitialized_variables
 
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 import 'package:iwash/screen/main/home.dart';
 import 'package:iwash/widgets/Bootombar.dart';
+import 'package:mysql1/mysql1.dart';
 import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'order_confirm.dart';
 
@@ -27,19 +24,32 @@ class BookingScreen extends StatefulWidget {
 class _BookingScreenState extends State<BookingScreen> {
   var countryCodeController = TextEditingController(text: '+91');
   var hour = 0;
-
+  int? userId;
   @override
   void initState() {
     super.initState();
-    fetch();
-    fetchstoreList();
+    fetchUserId().then((value) {
+      setState(() => userId = value);
+      fetch();
+    });
+
+    //fetchstoreList();
 
     final DateTime now = DateTime.now();
-    formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+    formattedDate = DateFormat('yyyy-MM-dd - kk:mm').format(now);
   }
+
+  Future<int?> fetchUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId');
+    return userId;
+  }
+
+  int? user;
 
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
+  // ignore: unused_field
   final _cityController = TextEditingController();
   final _emailController = TextEditingController();
 
@@ -53,11 +63,6 @@ class _BookingScreenState extends State<BookingScreen> {
   var pickedTime = '';
   String selectedItems = '';
   String selectedStore = '';
-
-  // String countryValue = 'India';
-  // String stateValue = '';
-  // String cityValue = '';
-
   String shopname = '';
   String shopphoneNumber = '';
   String shopaddress = '';
@@ -68,7 +73,8 @@ class _BookingScreenState extends State<BookingScreen> {
     'Wash & Fold',
     'Wash & Iron',
     'Steam Iron',
-    'Scraching',
+    'Home Clean',
+    'Spotting',
     'Shoe Cleaning',
     'Toy Cleaning',
     'Car Wash'
@@ -79,27 +85,32 @@ class _BookingScreenState extends State<BookingScreen> {
   List<String> storeList = [];
   String storeListText = '';
 
+  //working correctly no need to change
   void fetchstoreList() async {
     setState(() {
       selectedStore = '';
     });
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    final CollectionReference _storesCollection =
-        _firestore.collection('Stores');
-    final DocumentReference _storeLocationDocument =
-        _storesCollection.doc('storelocation');
-    final DocumentSnapshot snapshot = await _storeLocationDocument.get();
-    //final List<dynamic> storeArray = snapshot.get(city.toLowerCase());
-    final Map<String, dynamic>? dataMap =
-        snapshot.data() as Map<String, dynamic>?;
-
-    if (dataMap != null && dataMap.containsKey(city.toLowerCase())) {
-      final List<dynamic> storeArray = dataMap[city.toLowerCase()];
-
+    final ConnectionSettings settings = ConnectionSettings(
+      host: 'srv665.hstgr.io',
+      port: 3306,
+      user: 'u332079037_iwashhubonline',
+      password: 'Iwashhub@123',
+      db: 'u332079037_iwashhubapp',
+    );
+    // Connect to the Hostinger database
+    final MySqlConnection conn = await MySqlConnection.connect(settings);
+    Results results = await conn.query(
+        'SELECT store FROM storelocation WHERE city = ?', [city.toLowerCase()]);
+    if (results.isNotEmpty) {
+      storeList = [];
+      for (var userData in results) {
+        if (userData['store'] != null) {
+          storeList.add(userData['store']);
+        }
+      }
       setState(() {
-        storeList = List<String>.from(storeArray);
         storeListText = storeList.isNotEmpty
-            ? 'Store: ${storeList.toString()}'
+            ? 'Stores: ${storeList.join(', ')}'
             : 'No store located';
       });
     } else {
@@ -110,44 +121,48 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
+  //working correctly no change needed
   Future<void> fetch() async {
-    // Fetch user details from the Firebase database
+    if (userId != null) {
+      final ConnectionSettings settings = ConnectionSettings(
+        host: 'srv665.hstgr.io',
+        port: 3306,
+        user: 'u332079037_iwashhubonline',
+        password: 'Iwashhub@123',
+        db: 'u332079037_iwashhubapp',
+      );
 
-    final user = FirebaseAuth.instance.currentUser!;
-    final userSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .snapshots();
+      // Connect to the Hostinger database
+      final MySqlConnection conn = await MySqlConnection.connect(settings);
+      Results results =
+          await conn.query('SELECT * FROM users WHERE id = ?', [userId]);
+      if (results.isNotEmpty) {
+        final userData = results.first;
+        if (userData['name'] != null &&
+            userData['address'] != null &&
+            userData['email'] != null) {
+          setState(() {
+            final blobValue = userData['name'];
+            final bytes = blobValue.toBytes();
+            final user = String.fromCharCodes(bytes);
+            username = user;
 
-    userSnapshot.listen((snapshot) {
-      if (snapshot.exists) {
-        final userData = snapshot.data();
-        if (userData != null) {
-          if (userData['name'] != null &&
-                  userData['name'].isNotEmpty &&
-                  userData['address'] != null &&
-                  userData['address'].isNotEmpty &&
-                  userData['email'] != null &&
-                  userData['email'].isNotEmpty
-              //&&
-              // userData['city'] != null &&
-              // userData['city'].isNotEmpty
-              ) {
-            setState(() {
-              username = userData['name'];
-              address = userData['address'];
-              //city = userData['city'];
-              phoneNumber = userData['Phone Number'];
-            });
-            fetchstoreList();
-          } else {
-            _showUpdateDialog(context);
-          }
+            final blobValu = userData['address'];
+            final byte = blobValu.toBytes();
+            final add = String.fromCharCodes(byte);
+            address = add;
+
+            phoneNumber = userData['phone_number'];
+          });
+          //fetchstoreList();
+        } else {
+          _showUpdateDialog(context);
         }
-      }
-    });
+      } else {}
+    } else {}
   }
 
+  //working correctly no change needed
   void _showStoreSelectionPopup(BuildContext context) async {
     final result = await showModalBottomSheet<String>(
       context: context,
@@ -155,8 +170,8 @@ class _BookingScreenState extends State<BookingScreen> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 'Available Stores',
                 style: TextStyle(
@@ -165,7 +180,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
               ),
             ),
-            Divider(),
+            const Divider(),
             Expanded(
               child: ListView(
                 children: storeList.map((String store) {
@@ -190,6 +205,7 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
+  //working correctly no change needed
   void _showUpdateDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -270,83 +286,92 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
+  //working correctly no change needed
   void _updateValues() async {
-    // Update the user details in the Firebase database
-    final user = FirebaseAuth.instance.currentUser!;
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-      'name': _nameController.text,
-      'address': _addressController.text,
-      'email': _emailController.text,
-      //'city': _cityController.text,
-    });
-    fetch();
+    final ConnectionSettings settings = ConnectionSettings(
+      host: 'srv665.hstgr.io',
+      port: 3306,
+      user: 'u332079037_iwashhubonline',
+      password: 'Iwashhub@123',
+      db: 'u332079037_iwashhubapp',
+    );
+    final MySqlConnection conn = await MySqlConnection.connect(settings);
+    await conn.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT');
+    await conn.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT');
+    await conn.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT');
+    final result = await conn.query(
+      'UPDATE users SET name = ?, address = ?, email = ? WHERE id = ?',
+      [
+        _nameController.text,
+        _addressController.text,
+        _emailController.text,
+        userId
+      ],
+    );
+    if (result.affectedRows! > 0) {
+      fetch();
+    } else {}
   }
 
+  //no need to change but have to take a look here
   Future<void> _saveItem() async {
-    final url =
-        Uri.https('iwash-d6737-default-rtdb.firebaseio.com', 'Orders.json');
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(
-          {
-            'Name of Customer': username,
-            'Phone Number': phoneNumber,
-            'Address': address,
-            'Services': selectedItems,
-            'Date & Time of Pickup': '$pickedDate $pickedTime',
-            'Date & Time': formattedDate,
-            'Selected Store': selectedStore,
-          },
+    final ConnectionSettings settings = ConnectionSettings(
+      host: 'srv665.hstgr.io',
+      port: 3306,
+      user: 'u332079037_iwashhubonline',
+      password: 'Iwashhub@123',
+      db: 'u332079037_iwashhubapp',
+    );
+    final MySqlConnection conn = await MySqlConnection.connect(settings);
+    await conn.query('''
+CREATE TABLE IF NOT EXISTS orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  phone_number VARCHAR(255) NOT NULL, 
+  customerName VARCHAR(255) NOT NULL, 
+  customerAddress VARCHAR(500) NOT NULL,
+  customerCity VARCHAR(255) NOT NULL,
+  services VARCHAR(255) NOT NULL,
+  serviceDateTime VARCHAR(300),
+  selectedStore VARCHAR(250),
+  created_at TIMESTAMP NOT NULL,
+  userID VARCHAR(255) NOT NULL
+)
+''');
+    String Pickup = '$pickedDate $pickedTime';
+    final result = await conn.query(
+      'INSERT INTO orders (phone_number, customerName, customerAddress, customerCity, services, serviceDateTime, selectedStore, created_at, userID) VALUES (?, ?,?, ?,?, ?,?, ?,?)',
+      [
+        phoneNumber,
+        username,
+        address,
+        city,
+        selectedItems,
+        Pickup,
+        selectedStore,
+        formattedDate,
+        userId
+      ],
+    );
+    await conn.close();
+    if (result.affectedRows! > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order Placed successfully!'),
         ),
       );
-      final user = FirebaseAuth.instance.currentUser!;
-      await FirebaseFirestore.instance.collection('Orders').doc().set({
-        'Name of Customer': username,
-        'Phone Number': phoneNumber,
-        'Address': address,
-        'Services': selectedItems,
-        'Date & Time of Pickup': '$pickedDate $pickedTime',
-        'Date & Time': formattedDate,
-        'Selected Store': selectedStore,
-      });
-
-      if (response.statusCode == 200) {
-        //Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Order Placed successfully!'),
-          ),
-        );
-        // Send notification to user
-
-        // Rebuild screen
-        setState(() {
-          // Reset form fields
-          selectedOptions;
-          pickedDate;
-          pickedTime;
-        });
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OrderConfirm(
-                phoneNumber: phoneNumber,
-                city: city,
-                selectedStore: selectedStore),
-          ),
-        );
-      } else {
-        // Handle error
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please try again')),
-        );
-      }
-    } catch (error) {
-      // Handle error
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OrderConfirm(
+              phoneNumber: phoneNumber,
+              city: city,
+              selectedStore: selectedStore),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please try again')),
+      );
     }
   }
 
@@ -368,6 +393,7 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget build(BuildContext context) {
     final ProgressDialog progressDialog = ProgressDialog(
       context,
+      isDismissible: false,
     );
     progressDialog.style(
         message: 'Please wait',
@@ -445,6 +471,70 @@ class _BookingScreenState extends State<BookingScreen> {
                 child: Column(
                   children: [
                     const Text(
+                      "City",
+                      style: TextStyle(fontSize: 15),
+                    ),
+                    Card(
+                      color: Colors.white,
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ListTile(
+                        title: Text(city),
+                        leading: const Icon(Icons.location_city),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.blueAccent,
+                        ),
+                        onTap: () {
+                          final TextEditingController controller =
+                              TextEditingController();
+                          controller.text = city;
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Enter your current City'),
+                                content: TextField(
+                                  controller: controller,
+                                  keyboardType: TextInputType.streetAddress,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.deny(
+                                        RegExp(r"\s")), // Deny space character
+                                  ],
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      if (city.isNotEmpty) {
+                                        setState(() {
+                                          city = controller.text;
+                                        });
+                                        fetchstoreList();
+                                        Navigator.of(context).pop();
+                                      } else {
+                                        if (city.isEmpty) {
+                                          city = 'Please enter city';
+                                        }
+                                      }
+                                    },
+                                    child: const Text('Save'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    const Text(
                       "Address",
                       style: TextStyle(fontSize: 15),
                     ),
@@ -508,95 +598,33 @@ class _BookingScreenState extends State<BookingScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: Column(
-                  children: [
-                    const Text(
-                      "City",
-                      style: TextStyle(fontSize: 15),
-                    ),
-                    Card(
-                      color: Colors.white,
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ListTile(
-                        title: Text(city),
-                        leading: const Icon(Icons.location_city),
-                        trailing: const Icon(
-                          Icons.chevron_right,
-                          color: Colors.blueAccent,
-                        ),
-                        onTap: () {
-                          final TextEditingController controller =
-                              TextEditingController();
-                          controller.text = city;
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Enter City'),
-                                content: TextField(
-                                  controller: controller,
-                                  keyboardType: TextInputType.streetAddress,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.deny(
-                                        RegExp(r"\s")), // Deny space character
-                                  ],
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      if (city.isNotEmpty) {
-                                        setState(() {
-                                          city = controller.text;
-                                        });
-                                        fetchstoreList();
-                                        Navigator.of(context).pop();
-                                      } else {
-                                        if (city.isEmpty) {
-                                          city = 'Please enter city';
-                                        }
-                                      }
-                                    },
-                                    child: const Text('Save'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
           const SizedBox(
             height: 20,
           ),
+
+          //may have to make changes
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 storeList.isEmpty && city.isEmpty
                     ? 'Enter your City'
-                    : (storeList.isEmpty
-                        ? 'No store located'
-                        : "Select a Store"),
+                    : (storeList.isEmpty ? 'No store located' : ""),
+                style: const TextStyle(fontSize: 20),
               ),
             ],
           ),
-
           if (storeList.isNotEmpty)
             OutlinedButton(
               onPressed: () {
                 _showStoreSelectionPopup(context);
               },
               child: Text(
-                  selectedStore.isNotEmpty ? selectedStore : 'Select a store'),
+                selectedStore.isNotEmpty ? selectedStore : 'Select a Store',
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
           const SizedBox(
             height: 20,
@@ -622,25 +650,6 @@ class _BookingScreenState extends State<BookingScreen> {
           const SizedBox(
             height: 20,
           ),
-          // Card(
-          //   color: Colors.white,
-          //   elevation: 4,
-          //   shape: RoundedRectangleBorder(
-          //     borderRadius: BorderRadius.circular(8),
-          //   ),
-          //   child: ListTile(
-          //     title: const Text('Apply Coupon'),
-          //     leading: const Icon(Icons.card_giftcard),
-          //     trailing: const Icon(
-          //       Icons.chevron_right,
-          //       color: Colors.blueAccent,
-          //     ),
-          //     onTap: () => {},
-          //   ),
-          // ),
-          // const SizedBox(
-          //   height: 10,
-          // ),
           Card(
             color: Colors.white,
             elevation: 4,
@@ -676,10 +685,6 @@ class _BookingScreenState extends State<BookingScreen> {
             child: ListTile(
               title: Text('Time for Pickup: $pickedTime'),
               leading: const Icon(Icons.lock_clock),
-              trailing: const Icon(
-                Icons.chevron_right,
-                color: Colors.blueAccent,
-              ),
               onTap: () {
                 _selectTime();
               },
@@ -715,7 +720,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Alert'),
-                        content: const Text('Please Enter Address'),
+                        content: const Text('Please Enter your Address'),
                         actions: [
                           TextButton(
                             onPressed: () {
@@ -733,7 +738,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Alert'),
-                        content: const Text('Please Enter City value'),
+                        content: const Text('Please Enter your City'),
                         actions: [
                           TextButton(
                             onPressed: () {
@@ -771,7 +776,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Alert'),
-                        content: const Text('Please Select Store'),
+                        content: const Text('Please Select a Store'),
                         actions: [
                           TextButton(
                             onPressed: () {
@@ -797,7 +802,9 @@ class _BookingScreenState extends State<BookingScreen> {
             ),
           ),
         ]),
-        bottomNavigationBar: const BottomBar(),
+        bottomNavigationBar: const BottomBar(
+          selectedIndex: 3,
+        ),
       ),
     );
   }

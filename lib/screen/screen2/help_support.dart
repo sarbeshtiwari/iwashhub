@@ -29,7 +29,7 @@ class HelpSupport extends StatelessWidget {
               GFAccordion(
                 title: "How to reschedule a missed order?",
                 content:
-                    "If in case you miss your order, you can reschedule it by calling at +91 894-831-0077 , and we will reschedule it. You may also do it online through website or mobile App.",
+                    "If in case you miss your order, you can reschedule it by calling at +91 894-831-0077, you may also do it online through our website www.iwashhub.com and mobile application",
                 titleBorderRadius: BorderRadius.all(Radius.circular(10)),
                 contentBorderRadius: BorderRadius.all(Radius.circular(10)),
               ),
@@ -41,7 +41,7 @@ class HelpSupport extends StatelessWidget {
                 contentBorderRadius: BorderRadius.all(Radius.circular(10)),
               ),
               GFAccordion(
-                title: "How can I schedule my service with iWash Hub ?",
+                title: "How can I schedule my service with iWash Hub?",
                 content:
                     "An order can be scheduled through iWash Hub mobile application, website, or by calling at +91 894-831-0077. You can also visit to the nearest iWash Hub store.",
                 titleBorderRadius: BorderRadius.all(Radius.circular(10)),
@@ -92,7 +92,7 @@ class HelpSupport extends StatelessWidget {
               GFAccordion(
                 title: "How do I avail discounts?",
                 content:
-                    "Every discounts/Offers is always displaced on the website or App in the 'promotion page'. Also, keep checking your inbox regularly for our exciting offers. ",
+                    "Every discounts/Offers is always displaced on the website or App in the 'promotion page'. Also, keep checking your inbox regularly for our exciting offers.",
                 titleBorderRadius: BorderRadius.all(Radius.circular(10)),
                 contentBorderRadius: BorderRadius.all(Radius.circular(10)),
               ),

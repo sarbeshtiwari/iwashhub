@@ -2,11 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:iwash/screen/screen2/booking_screen.dart';
-import 'dart:convert';
-//import '../../API/price_list.dart';
+import 'package:mysql1/mysql1.dart';
 import '../../widgets/Bootombar.dart';
-import 'package:http/http.dart' as http;
-//import 'package:connectivity/connectivity.dart';
 
 class PriceScreen extends StatefulWidget {
   const PriceScreen({super.key});
@@ -18,18 +15,6 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   List<Map<dynamic, dynamic>> lists = [];
-  final datasetNames = [
-    'Bag Cleaning',
-    'Dry Clean Female',
-    'Dry Clean Male',
-    'Dry Clean Men',
-    'Dry Clean Women',
-    'Household',
-    'Shoes',
-    'Laundry',
-    'Scraching',
-    'Test'
-  ];
 
   @override
   void initState() {
@@ -43,39 +28,32 @@ class _PriceScreenState extends State<PriceScreen> {
     setState(() {
       isLoading = true;
     });
+    final ConnectionSettings settings = ConnectionSettings(
+      host: 'srv665.hstgr.io',
+      port: 3306,
+      user: 'u332079037_iwashhubonline',
+      password: 'Iwashhub@123',
+      db: 'u332079037_iwashhubapp',
+    );
 
-    final urls = [
-      Uri.https('iwash-d6737-default-rtdb.firebaseio.com', 'Bag_cleaning.json'),
-      Uri.https(
-          'iwash-d6737-default-rtdb.firebaseio.com', 'Dry_clean_female.json'),
-      Uri.https(
-          'iwash-d6737-default-rtdb.firebaseio.com', 'Dry_clean_male.json'),
-      Uri.https(
-          'iwash-d6737-default-rtdb.firebaseio.com', 'Dry_clean_men.json'),
-      Uri.https(
-          'iwash-d6737-default-rtdb.firebaseio.com', 'Dry_clean_women.json'),
-      Uri.https('iwash-d6737-default-rtdb.firebaseio.com',
-          'Dry_clean_household.json'),
-      Uri.https('iwash-d6737-default-rtdb.firebaseio.com', 'Shoes.json'),
-      Uri.https('iwash-d6737-default-rtdb.firebaseio.com', 'Laundry.json'),
-      Uri.https('iwash-d6737-default-rtdb.firebaseio.com', 'Scraching.json'),
-      // add more urls here
-    ];
+    // Connect to the Hostinger database
+    final MySqlConnection conn = await MySqlConnection.connect(settings);
+    Results results = await conn.query(
+        'SELECT * FROM washiron UNION SELECT * FROM washfold UNION SELECT * FROM houseclean UNION SELECT * FROM drycleanfemale_heavy UNION SELECT * FROM drycleanfemale_light UNION SELECT * FROM drycleanmale_heavy UNION SELECT * FROM drycleanmale_light UNION SELECT * FROM shoesclean UNION SELECT * FROM steampress UNION SELECT * FROM toywash UNION SELECT * FROM carwash UNION SELECT * FROM spotting');
 
-    final responses = await Future.wait(urls.map((url) => http.get(url)));
-
-    setState(() {
-      lists.clear();
-      for (final response in responses) {
-        if (response.statusCode == 200) {
-          Map<dynamic, dynamic> values = jsonDecode(response.body);
-          values.forEach((key, values) {
-            lists.add(values);
-          });
-        }
+    if (results.isNotEmpty) {
+      // Iterate over the results and add the data to the list
+      for (var row in results) {
+        lists.add({
+          'Product': row['Product'],
+          'Price': row['Price'],
+        });
       }
+      setState(() {
+        lists = lists;
+      });
       isLoading = false;
-    });
+    }
   }
 
   String searchQuery = '';
@@ -126,14 +104,45 @@ class _PriceScreenState extends State<PriceScreen> {
           Expanded(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: lists
-                  .where((element) => element['Product'].contains(searchQuery))
-                  .length,
+              itemCount: lists.where((element) {
+                if (searchQuery.isEmpty) return true;
+                final product = element['Product'].toLowerCase();
+                final searchQueryLower = searchQuery.toLowerCase();
+                int matchingChars = 0;
+                for (int i = 0;
+                    i < product.length && i < searchQueryLower.length;
+                    i++) {
+                  if (product[i] == searchQueryLower[i]) matchingChars++;
+                }
+                final matchPercentage =
+                    (matchingChars / searchQueryLower.length) * 100;
+                return matchPercentage >= 60;
+              }).length,
+
+              // itemCount: lists
+              //     .where((element) => element['Product'].contains(searchQuery))
+              //     .length,
               itemBuilder: (BuildContext context, int index) {
-                final item = lists
-                    .where(
-                        (element) => element['Product'].contains(searchQuery))
-                    .elementAt(index);
+                final item = lists.where((element) {
+                  if (searchQuery.isEmpty) return true;
+                  final product = element['Product'].toLowerCase();
+                  final searchQueryLower = searchQuery.toLowerCase();
+                  int matchingChars = 0;
+                  for (int i = 0;
+                      i < product.length && i < searchQueryLower.length;
+                      i++) {
+                    if (product[i] == searchQueryLower[i]) matchingChars++;
+                  }
+                  final matchPercentage =
+                      (matchingChars / searchQueryLower.length) * 100;
+
+                  return matchPercentage >= 60;
+                }).elementAt(index);
+                // itemBuilder: (BuildContext context, int index) {
+                //   final item = lists
+                //       .where(
+                //           (element) => element['Product'].contains(searchQuery))
+                //       .elementAt(index);
                 return Column(
                   children: [
                     Container(
@@ -170,15 +179,17 @@ class _PriceScreenState extends State<PriceScreen> {
                         ),
                       ),
                     ),
+                    if (index == lists.length - 1)
+                      const Text(
+                        "*PRICES ON THE APP ARE INDICATIVE ONLY & MAY VARY",
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
                   ],
                 );
               },
             ),
-          ),
-          const Text(
-            "*Prices May vary",
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -201,7 +212,9 @@ class _PriceScreenState extends State<PriceScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomBar(),
+      bottomNavigationBar: const BottomBar(
+        selectedIndex: 1,
+      ),
     );
   }
 }

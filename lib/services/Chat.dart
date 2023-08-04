@@ -1,25 +1,30 @@
+// ignore_for_file: file_names
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
 class ChatbotApp extends StatefulWidget {
   static String id = 'ChatbotApp';
 
   const ChatbotApp({super.key});
   @override
-  _ChatbotAppState createState() => _ChatbotAppState();
+  State<ChatbotApp> createState() => _ChatbotAppState();
 }
 
 class _ChatbotAppState extends State<ChatbotApp> {
   final List<ChatMessage> _messages = [];
   final TextEditingController _textEditingController = TextEditingController();
 
-  void _handleSubmitted(String text) {
+  void _handleSubmitted(String text) async {
     setState(() {
       _messages.insert(0, ChatMessage(text: text, isUserMessage: true));
       _textEditingController.clear();
     });
 
     // Process the user's message and generate a response
-    String response = generateResponse(text);
+    String response = await generateResponse(text);
 
     // Simulate a delay before showing the response
     Future.delayed(const Duration(seconds: 1), () {
@@ -27,14 +32,14 @@ class _ChatbotAppState extends State<ChatbotApp> {
         _messages.insert(0, ChatMessage(text: response, isUserMessage: false));
       });
     });
-    
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chatbot'),
+        title: const Text('Ananya (Virtual iWash Hub Executive)',
+            style: TextStyle(fontSize: 18)),
       ),
       body: Column(
         children: <Widget>[
@@ -88,7 +93,7 @@ class ChatMessage extends StatelessWidget {
   final String text;
   final bool isUserMessage;
 
-  const ChatMessage({required this.text, this.isUserMessage = true});
+  const ChatMessage({super.key, required this.text, this.isUserMessage = true});
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +116,7 @@ class ChatMessage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0, left: 8.0),
                   child: Text(
-                    isUserMessage ? 'You' : 'iwashhub',
+                    isUserMessage ? 'You' : 'Ananya',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -128,7 +133,7 @@ class ChatMessage extends StatelessWidget {
   }
 }
 
-String generateResponse(String message) {
+Future<String> generateResponse(String message) async {
   // Simple response generation logic
   if (message.toLowerCase().contains('hello') ||
       message.toLowerCase().contains('hi')) {
@@ -234,6 +239,64 @@ String generateResponse(String message) {
   } else if (message.toLowerCase().contains("wine stains")) {
     return "Wine stains should be treated as soon as possible. Blot the stain with a clean cloth to absorb excess liquid, then apply a stain remover or a mixture of dish soap and hydrogen peroxide before laundering.";
   } else {
-    return "I'm sorry, I didn't understand that. I am still under training";
+    final response = await datafile(message);
+    // Use the response here
+    return response;
   }
 }
+
+Future<String> datafile(String text) async {
+  final data = await rootBundle.loadString('assets/data.json');
+
+  // Parse the data
+  final jsonData = jsonDecode(data);
+
+  // Example user message
+  final message = text;
+
+  // Find the most similar question in the JSON file
+  final bestMatch = jsonData.reduce((best, current) {
+    final bestSimilarity = ratio(best['question'], message);
+    final currentSimilarity = ratio(current['question'], message);
+    return bestSimilarity > currentSimilarity ? best : current;
+  });
+
+  // Use the response for the most similar question
+  final bestSimilarity = ratio(bestMatch['question'], message);
+  if (bestSimilarity >= 45) {
+    // Use the response for the most similar question
+    final response = bestMatch['response'];
+    return response;
+  } else {
+    return "Hey , I didn't get you . It will be better if you can call my colleague on 894-831-0077 from Mon-Sat 11 AM to 7 PM or Email them at info@iwashhub.com.";
+  }
+  // final response = bestMatch['response'];
+  // return response;
+}
+
+
+
+
+  // //new data add up
+  // else if (message.toLowerCase().contains("services")) {
+  //   return "iWash Hub offers a wide range of services, including laundry, dry cleaning, ironing, and stain removal. We take care of all your garment needs!";
+  // } else if (message.toLowerCase().contains("nearest iWash")) {
+  //   return "We have multiple iWash Hub locations in various cities. To find the nearest one, please visit our website and use the store locator feature. Enter your zip code, and we'll show you the closest location.";
+  // } else if (message.toLowerCase().contains("dry cleaning a suit")) {
+  //   return "The price for dry cleaning a suit depends on the type of fabric and any additional services you might require. Our prices are genuine and affordable. Please visit our website or contact the nearest iWash Hub store for specific pricing details.";
+  // } else if (message.toLowerCase().contains("remove tough stains")) {
+  //   return "Absolutely! Our expert team at iWash Hub is skilled in dealing with tough stains. From wine spills to ink marks, we've got you covered. Just bring in the stained garments, and we'll work our magic to make them look as good as new.";
+  // } else if (message.toLowerCase().contains("pickup and delivery")) {
+  //   return "Yes, we do! At iWash Hub, we understand the value of your time. We offer convenient pickup and delivery services for your laundry and dry cleaning needs. Simply schedule a pickup through our website or mobile app, and we'll handle the rest!";
+  // } else if (message.toLowerCase().contains("operating hours")) {
+  //   return "Our operating hours vary slightly across different locations, but most iWash Hub stores are open from 8:00 AM to 8:00 PM, Monday to Saturday. Some stores may have reduced hours on Sundays. Please check our website or contact your nearest store for precise operating hours.";
+  // } else if (message.toLowerCase().contains("customer support")) {
+  //   return "You can reach our friendly customer support team by calling our toll-free helpline at 1-800-XXX-XXXX. We are available to assist you with any queries or concerns you may have regarding our services.";
+  // } else if (message.toLowerCase().contains("loyalty programs")) {
+  //   return "Yes, we do offer periodic discounts and loyalty programs to our valued customers. Keep an eye on our website and social media channels for the latest updates on special offers and promotions.";
+  // } else if (message.toLowerCase().contains("discounts")) {
+  //   return "Yes, we do offer periodic discounts and loyalty programs to our valued customers. Keep an eye on our website and social media channels for the latest updates on special offers and promotions.";
+  // }
+  // else if (message.toLowerCase().contains("")) {
+  //   return "";
+  // }

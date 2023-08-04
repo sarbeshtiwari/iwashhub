@@ -1,10 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api, prefer_interpolation_to_compose_strings
 
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:iwash/screen/main/home.dart';
 import 'package:iwash/screen/screen2/booking_screen.dart';
+import 'package:mysql1/mysql1.dart';
 
 import '../widgets/Bootombar.dart';
 
@@ -37,7 +36,8 @@ class _FetchDataState extends State<FetchData> {
   List<String> typesList = [
     'Dry Clean',
     'Household',
-    'Laundry',
+    'Wash & fold',
+    'Wash & iron',
     'Steam Iron',
     'Shoe Clean',
     'Toy Clean',
@@ -59,19 +59,33 @@ class _FetchDataState extends State<FetchData> {
     setState(() {
       isLoading = true;
     });
-    final url = Uri.https(
-        'iwash-d6737-default-rtdb.firebaseio.com', widget.userDefinedValue);
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      setState(() {
-        lists.clear();
-        Map<dynamic, dynamic> values = jsonDecode(response.body);
-        values.forEach((key, values) {
-          lists.add(values);
+    final ConnectionSettings settings = ConnectionSettings(
+      host: 'srv665.hstgr.io',
+      port: 3306,
+      user: 'u332079037_iwashhubonline',
+      password: 'Iwashhub@123',
+      db: 'u332079037_iwashhubapp',
+    );
+
+    // Connect to the Hostinger database
+    final MySqlConnection conn = await MySqlConnection.connect(settings);
+    String table = widget.userDefinedValue;
+    Results results = await conn.query('SELECT * FROM $table');
+
+    if (results.isNotEmpty) {
+      // Iterate over the results and add the data to the list
+      for (var row in results) {
+        lists.add({
+          'Product': row['Product'],
+          'Price': row['Price'],
         });
-        isLoading = false;
+      }
+      setState(() {
+        lists = lists;
       });
+      isLoading = false;
     } else {
+      // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -204,7 +218,7 @@ class _FetchDataState extends State<FetchData> {
                                         Card(
                                           child: ListTile(
                                             onTap: () => onButtonPressed(
-                                                'Dry_clean_female.json'),
+                                                'drycleanfemale_heavy'),
                                             title: const Text(
                                                 'Female(Heavy Cloths)'),
                                           ),
@@ -212,7 +226,15 @@ class _FetchDataState extends State<FetchData> {
                                         Card(
                                           child: ListTile(
                                             onTap: () => onButtonPressed(
-                                                'Dry_clean_male.json'),
+                                                'drycleanfemale_light'),
+                                            title: const Text(
+                                                'Female(Light Cloths)'),
+                                          ),
+                                        ),
+                                        Card(
+                                          child: ListTile(
+                                            onTap: () => onButtonPressed(
+                                                'drycleanmale_heavy'),
                                             title: const Text(
                                                 'Male(Heavy Cloths)'),
                                           ),
@@ -220,17 +242,9 @@ class _FetchDataState extends State<FetchData> {
                                         Card(
                                           child: ListTile(
                                             onTap: () => onButtonPressed(
-                                                'Dry_clean_men.json'),
+                                                'drycleanmale_light'),
                                             title:
                                                 const Text('Men(Light Cloths)'),
-                                          ),
-                                        ),
-                                        Card(
-                                          child: ListTile(
-                                            onTap: () => onButtonPressed(
-                                                'Dry_clean_women.json'),
-                                            title: const Text(
-                                                'Female(Light Cloths)'),
                                           ),
                                         ),
                                       ],
@@ -249,27 +263,35 @@ class _FetchDataState extends State<FetchData> {
                             );
                           } else if (selectedValue == 'Household') {
                             onButtonPressed(
-                              'Dry_clean_household.json',
+                              'houseclean',
                             );
-                          } else if (selectedValue == 'Laundry') {
+                          } else if (selectedValue == 'Wash & fold') {
                             onButtonPressed(
-                              'Laundry.json',
+                              'washfold',
+                            );
+                          } else if (selectedValue == 'Wash & iron') {
+                            onButtonPressed(
+                              'washiron',
                             );
                           } else if (selectedValue == 'Steam Iron') {
                             onButtonPressed(
-                              'Steam_iron.json',
+                              'steampress',
                             );
                           } else if (selectedValue == 'Shoe Clean') {
                             onButtonPressed(
-                              'Shoes.json',
+                              'shoesclean',
                             );
-                          } else if (selectedValue == 'Bag Clean') {
+                          } else if (selectedValue == 'Toy Clean') {
                             onButtonPressed(
-                              'Bag_cleaning.json',
+                              'toywash',
                             );
-                          } else if (selectedValue == 'Scraching') {
+                          } else if (selectedValue == 'Spotting') {
                             onButtonPressed(
-                              'Scraching.json',
+                              'spotting',
+                            );
+                          } else if (selectedValue == 'Car Wash') {
+                            onButtonPressed(
+                              'carwash',
                             );
                           }
                         },
@@ -309,44 +331,50 @@ class _FetchDataState extends State<FetchData> {
                   itemBuilder: (BuildContext context, int index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Card(
-                        color: const Color.fromARGB(255, 109, 210, 250),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                lists[index]["Product"],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text("Price"),
+                      child: Column(
+                        children: [
+                          Card(
+                            color: const Color.fromARGB(255, 109, 210, 250),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
                                   Text(
-                                    "₹" + lists[index]["Price"],
+                                    lists[index]["Product"],
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold),
                                   ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("Price"),
+                                      Text(
+                                        "₹" + lists[index]["Price"],
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          if (lists.length - 1 == index)
+                            const Text(
+                              "*PRICES ON THE APP ARE INDICATIVE ONLY & MAY VARY",
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                        ],
                       ),
                     );
                   }),
-            ),
-            const Text(
-              "*Prices May vary",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -369,7 +397,9 @@ class _FetchDataState extends State<FetchData> {
             ],
           ),
         ),
-        bottomNavigationBar: const BottomBar(),
+        bottomNavigationBar: const BottomBar(
+          selectedIndex: 1,
+        ),
       ),
     );
   }

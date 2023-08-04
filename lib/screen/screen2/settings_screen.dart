@@ -1,10 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iwash/screen/authentication/signup_screen.dart';
 import 'package:iwash/screen/screen2/privacy_policy.dart';
 import 'package:iwash/screen/screen2/terms_condition.dart';
-
-import '../../services/feedback.dart';
+import 'package:iwash/screen/starting/initial_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -32,7 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Privacy Policies'),
             trailing: const Icon(
               Icons.chevron_right,
-              color: Color.fromARGB(255, 82, 108, 255),
+              color: Colors.orange,
             ),
             onTap: () => {Navigator.pushNamed(context, PrivacyPolicy.id)},
           ),
@@ -41,40 +39,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Terms & Conditions'),
             trailing: const Icon(
               Icons.chevron_right,
-              color: Color.fromARGB(255, 82, 108, 255),
+              color: Colors.orange,
             ),
             onTap: () => {Navigator.pushNamed(context, TermsCondition.id)},
           ),
-
           const Divider(),
-          // ListTile(
-          //   title: const Text('Sign Out'),
-          //   trailing: const Icon(
-          //     Icons.chevron_right,
-          //     color: Color.fromARGB(255, 82, 108, 255),
-          //   ),
-          //   onTap: () => {
-          //     showDialog(
-          //       context: context,
-          //       builder: (BuildContext context) {
-          //         return AlertDialog(
-          //           title: const Text('Alert'),
-          //           content: const Text('Are you Sure'),
-          //           actions: [
-          //             TextButton(
-          //               onPressed: () {
-          //                 Navigator.of(context).pop();
-          //                 FirebaseAuth.instance.signOut();
-          //                 Navigator.pushNamed(context, SignUpScreen.id);
-          //               },
-          //               child: const Text('Yes'),
-          //             ),
-          //           ],
-          //         );
-          //       },
-          //     ),
-          //   },
-          // ),
           Center(
               child: ElevatedButton(
                   onPressed: () {
@@ -87,9 +56,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           actions: [
                             TextButton(
                               onPressed: () {
-                                
                                 Navigator.of(context).pop();
-                                FirebaseAuth.instance.signOut();
+                                storeLoginState(false);
                                 Navigator.pushNamed(context, SignUpScreen.id);
                               },
                               child: const Text('Yes'),
@@ -99,7 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                     );
                   },
-                  child: Text("Sign Out")))
+                  child: const Text("Sign Out")))
         ],
       ),
     );

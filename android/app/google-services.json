@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:822918700528:android:4e0ea13e5494872f245135",
         "android_client_info": {
-          "package_name": "com.example.iwash"
+          "package_name": "com.app.iwash"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "822918700528-v2sptvr253kjqbv8bud96m2lctirsq3g.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.iwash",
+            "package_name": "com.app.iwash",
             "certificate_hash": "402dddab4160474d54eab903f769cc68c1f62f8e"
           }
         },
@@ -43,7 +43,7 @@
               "client_id": "822918700528-535b4u3tjnsis9fv5gksepkq8qb2605g.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.iwash"
+                "bundle_id": "com.app.iwash"
               }
             }
           ]

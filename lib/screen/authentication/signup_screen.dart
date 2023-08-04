@@ -1,20 +1,14 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable
 
 //import 'dart:io';
-
-//import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-//import 'package:iwash/screen/main/home.dart';
 import 'package:iwash/screen/screen2/privacy_policy.dart';
 import 'package:iwash/screen/screen2/terms_condition.dart';
-
-//import 'package:iwash/screen/starting/add_screen.dart';
 import 'package:iwash/services/phoneauth_service.dart';
+import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
 
-final _firebase = FirebaseAuth.instance;
+//final _firebase = FirebaseAuth.instance;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -35,8 +29,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // ignore: unused_field
   var _phoneNumber = '';
 
-  var _isAuthenticating = false;
-
   void _submit() async {
     final isValid = _form.currentState!.validate();
     if (!isValid) {
@@ -47,46 +39,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _form.currentState!.save();
 
     try {
-      // // ...
-      // print("1$_phoneNumber");
-      // // Perform phone number authentication
-      // final userCredentials =
-      //     await _firebase.verifyPhoneNumber(phoneNumber: _phoneNumber)
-      // print("2$_phoneNumber");
-      // await FirebaseFirestore.instance
-      //     .collection('users')
-      //     .doc(_phoneNumber)
-      //     .set({
-      //   'Phone Number': _phoneNumber,
-      // });
-      // print("3$_phoneNumber");
-      _isAuthenticating = true;
       String number =
           '${countryCodeController.text}${phoneNumberController.text}';
+      // String number = phoneNumberController.text;
+
       _service.verifyPhoneNumber(context, number);
 
-      // Fetch user details from the Firebase database
-      // final userSnapshot = await FirebaseFirestore.instance
-      //     .collection('users')
-      //     .where('phoneNumber', isEqualTo: _phoneNumber)
-      //     .limit(1)
-      //     .get();
-
-      // if (userSnapshot.docs.isNotEmpty) {
-      //   final userData = userSnapshot.docs[0].data();
-      //   // Extract user details from userData and store them as desired
-
-      //   // Navigate to the desired screen
-      //   Navigator.pushNamed(context, AddScreen.id);
-      // }
       // ignore: unused_catch_clause
-    } on FirebaseAuthException catch (error) {
+    } catch (error) {
       // ...
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final ProgressDialog progressDialog = ProgressDialog(
+      context,
+      isDismissible: false,
+    );
+    progressDialog.style(
+        message: 'Please wait',
+        borderRadius: 10.0,
+        backgroundColor: Colors.white,
+        progressWidget: const CircularProgressIndicator(),
+        elevation: 10.0,
+        insetAnimCurve: Curves.easeInOut,
+        progressTextStyle: const TextStyle(
+            color: Colors.black, fontSize: 13.0, fontWeight: FontWeight.w400),
+        messageTextStyle: const TextStyle(
+            color: Colors.black, fontSize: 19.0, fontWeight: FontWeight.w600));
+
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -167,22 +149,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 height: 15,
                               ),
                               const SizedBox(height: 12),
-                              if (_isAuthenticating)
-                                const CircularProgressIndicator(),
-                              if (!_isAuthenticating)
-                                ElevatedButton(
-                                  onPressed: _submit,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                  child: const Text(
-                                    'Login',
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  progressDialog.show();
+                                  _submit();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                ),
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
+                              ),
                             ],
                           ),
                         ),
@@ -200,11 +182,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               .copyWith(decoration: TextDecoration.none),
                           children: [
                             const TextSpan(
-                              text: "By Proceeding, You Agree to the ",
+                              text: "       By Proceeding, You Agree to the",
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Color.fromARGB(255, 255, 255, 255),
-                                //fontFamily: 'Muller',
+                                fontFamily: 'Muller',
                               ),
                             ),
                             TextSpan(
@@ -223,11 +205,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 },
                             ),
                             const TextSpan(
-                              text: " & ",
+                              text: " and ",
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Color.fromARGB(255, 255, 255, 255),
-                                //fontFamily: 'Muller',
+                                fontFamily: 'Muller',
                               ),
                             ),
                             TextSpan(

@@ -1,9 +1,6 @@
-import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:mysql1/mysql1.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PreviousOrder extends StatefulWidget {
   const PreviousOrder({super.key});
@@ -16,48 +13,56 @@ class PreviousOrder extends StatefulWidget {
 class _PreviousOrderState extends State<PreviousOrder> {
   List<Map<dynamic, dynamic>> lists = [];
 
-  String phoneNumber = '';
-
+  int? userId;
   @override
   void initState() {
     super.initState();
-    fetch();
-    fetchData();
+    fetchUserId().then((value) {
+      setState(() => userId = value);
+      fetchData();
+    });
   }
 
   bool isLoading = false;
 
-  void fetch() async {
-    final user = FirebaseAuth.instance.currentUser!;
-    final userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    setState(() {
-      phoneNumber = userData.data()!['Phone Number'];
-    });
+  Future<int?> fetchUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId');
+    return userId;
   }
 
   fetchData() async {
     setState(() {
       isLoading = true;
     });
-    final url = Uri.https('iwash-d6737-default-rtdb.firebaseio.com',
-        'Orders.json', {'orderBy': '"Date & Time"'});
+    final ConnectionSettings settings = ConnectionSettings(
+      host: 'srv665.hstgr.io',
+      port: 3306,
+      user: 'u332079037_iwashhubonline',
+      password: 'Iwashhub@123',
+      db: 'u332079037_iwashhubapp',
+    );
 
-    final response = await http.get(url);
+    // Connect to the Hostinger database
+    final MySqlConnection conn = await MySqlConnection.connect(settings);
+    Results results =
+        await conn.query('SELECT * FROM orders WHERE userID = ? ', [userId]);
 
-    if (response.statusCode == 200) {
-      setState(() {
-        lists.clear();
-        Map<dynamic, dynamic> values = jsonDecode(response.body);
-        values.forEach((key, values) {
-          if (values['Phone Number'] == phoneNumber) {
-            lists.add(values);
-          }
+    if (results.isNotEmpty) {
+      // Iterate over the results and add the data to the list
+      for (var row in results) {
+        lists.add({
+          'Name of Customer': row['customerName'],
+          'Services': row['services'],
+          'Date & Time of Pickup': row['serviceDateTime'],
+          'Address': row['customerAddress'],
+          'Selected Store': row['selectedStore'],
         });
-        isLoading = false;
+      }
+      setState(() {
+        lists = lists;
       });
+      isLoading = false;
     }
   }
 
@@ -86,6 +91,7 @@ class _PreviousOrderState extends State<PreviousOrder> {
           shrinkWrap: true,
           itemCount: lists.length,
           itemBuilder: (BuildContext context, int index) {
+            // In your build method
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Card(
@@ -161,35 +167,6 @@ class _PreviousOrderState extends State<PreviousOrder> {
               ),
             );
           }),
-      // Center(
-      //   child: Column(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: [
-      //       const Row(
-      //         mainAxisAlignment: MainAxisAlignment.center,
-      //         children: [
-      //           Text(
-      //             "Order Confirm",
-      //             style: TextStyle(
-      //               fontSize: 24,
-      //               fontWeight: FontWeight.bold,
-      //             ),
-      //           ),
-      //           SizedBox(width: 8),
-      //           Icon(Icons.favorite),
-      //         ],
-      //       ),
-      //       const Text("Our representative will contact you Soon"),
-      //       const SizedBox(height: 16),
-      //       ElevatedButton(
-      //         onPressed: () {
-      //           Navigator.pushNamed(context, Home.id);
-      //         },
-      //         child: const Text('Return to Home'),
-      //       ),
-      //     ],
-      //   ),
-      // ),
     );
   }
 }

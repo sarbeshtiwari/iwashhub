@@ -99,7 +99,8 @@ class _BoardScreenState extends State<BoardScreen> {
                 child: const Text(
                   "Skip",
                   style: TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    fontSize: 24,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

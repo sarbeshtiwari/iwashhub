@@ -1,18 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/services.dart';
 import 'package:iwash/screen/screen2/subscriptions_screen.dart';
-import 'package:iwash/services/feedback.dart';
-// import 'package:get/get.dart';
-
 import 'package:iwash/screen/screen2/notification_screen.dart';
 import 'package:iwash/services/Chat.dart';
 import 'package:iwash/widgets/Bootombar.dart';
-
+import 'package:mysql1/mysql1.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../API/fetch_data.dart';
-
 import '../screen2/booking_screen.dart';
 
 class Home extends StatefulWidget {
@@ -39,28 +35,57 @@ class _HomeState extends State<Home> {
   }
 
   String username = '';
+  int? userId;
   @override
   void initState() {
     super.initState();
-    fetch();
+    fetchUserId().then((value) {
+      setState(() => userId = value);
+      fetch();
+    });
   }
 
-  void fetch() async {
-    final user = FirebaseAuth.instance.currentUser!;
-    final userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    setState(() {
-      username = userData.data()!['name'];
-    });
+  Future<int?> fetchUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId');
+    return userId;
+  }
+
+  Future<void> fetch() async {
+    if (userId != null) {
+      final ConnectionSettings settings = ConnectionSettings(
+        host: 'srv665.hstgr.io',
+        port: 3306,
+        user: 'u332079037_iwashhubonline',
+        password: 'Iwashhub@123',
+        db: 'u332079037_iwashhubapp',
+      );
+
+      // Connect to the Hostinger database
+      final MySqlConnection conn = await MySqlConnection.connect(settings);
+      Results results =
+          await conn.query('SELECT * FROM users WHERE id = ?', [userId]);
+      if (results.isNotEmpty) {
+        final userData = results.first;
+        if (userData['name'] != null) {
+          setState(() {
+            final blobValue = userData['name'];
+            final bytes = blobValue.toBytes();
+            final user = String.fromCharCodes(bytes);
+            username = user;
+          });
+        }
+      } else {}
+    } else {}
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        final submitted = await showFeedbackForm(context);
+        final submitted = await launchUrl(Uri.parse(
+            'https://play.google.com/store/apps/details?id=com.wisshwashh.mobile'));
+
         SystemNavigator.pop();
         return submitted;
       },
@@ -85,10 +110,10 @@ class _HomeState extends State<Home> {
             child: Row(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top: 15),
+                  margin: const EdgeInsets.only(top: 30),
                   child: Image.asset(
-                    'assets/images/log.png',
-                    width: MediaQuery.of(context).size.width * 0.2,
+                    'assets/images/logo.png',
+                    width: MediaQuery.of(context).size.width * 0.15,
                     height: MediaQuery.of(context).size.height * 0.1,
                   ),
                 ),
@@ -96,7 +121,7 @@ class _HomeState extends State<Home> {
                   child: Container(
                     margin: const EdgeInsets.only(top: 35),
                     child: Align(
-                      alignment: Alignment.center,
+                      //alignment: Alignment.center,
                       child: Text(
                         "Hello, $username",
                         style: const TextStyle(
@@ -124,12 +149,8 @@ class _HomeState extends State<Home> {
                         margin: const EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.0),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                "https://firebasestorage.googleapis.com/v0/b/iwash-d6737.appspot.com/o/App%20banner%2F1.png?alt=media&token=019089a5-d9fd-4120-8167-bde70eb993d1"),
-                            //fit: BoxFit.cover,
-                          ),
                         ),
+                        child: Image.asset("assets/images/appbanner/1.png"),
                       ),
 
                       //2nd Image of Slider
@@ -137,12 +158,8 @@ class _HomeState extends State<Home> {
                         margin: const EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.0),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                "https://firebasestorage.googleapis.com/v0/b/iwash-d6737.appspot.com/o/App%20banner%2F2.png?alt=media&token=9046533e-0bf6-4962-b7c2-0243cf60515c"),
-                            //fit: BoxFit.cover,
-                          ),
                         ),
+                        child: Image.asset("assets/images/appbanner/2.png"),
                       ),
 
                       //3rd Image of Slider
@@ -150,12 +167,8 @@ class _HomeState extends State<Home> {
                         margin: const EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.0),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                "https://firebasestorage.googleapis.com/v0/b/iwash-d6737.appspot.com/o/App%20banner%2F3.png?alt=media&token=e0a30a96-1533-4089-a2be-8c9d0d6f3e65"),
-                            //fit: BoxFit.cover,
-                          ),
                         ),
+                        child: Image.asset("assets/images/appbanner/3.png"),
                       ),
 
                       //4th Image of Slider
@@ -163,12 +176,8 @@ class _HomeState extends State<Home> {
                         margin: const EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.0),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                "https://firebasestorage.googleapis.com/v0/b/iwash-d6737.appspot.com/o/App%20banner%2F4.png?alt=media&token=6f405001-4637-4544-9056-92d8e11f0a41"),
-                            //fit: BoxFit.cover,
-                          ),
                         ),
+                        child: Image.asset("assets/images/appbanner/4.png"),
                       ),
 
                       //5th Image of Slider
@@ -176,12 +185,8 @@ class _HomeState extends State<Home> {
                         margin: const EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.0),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                "https://firebasestorage.googleapis.com/v0/b/iwash-d6737.appspot.com/o/App%20banner%2F5.png?alt=media&token=31c9f018-c1d4-41e2-896d-25477f93aad2"),
-                            //fit: BoxFit.cover,
-                          ),
                         ),
+                        child: Image.asset("assets/images/appbanner/5.png"),
                       ),
                     ],
 
@@ -208,10 +213,12 @@ class _HomeState extends State<Home> {
                 const Align(
                   //alignment: Alignment.centerLeft,
                   child: Text(
-                    "Recommended Services",
+                    "RECOMMENDED SERVICES",
                     style: TextStyle(
                       fontSize: 15,
-                      color: Color.fromARGB(255, 21, 88, 4),
+                      color: Color.fromARGB(255, 243, 152, 39),
+                      fontFamily: 'ANTON',
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -224,7 +231,7 @@ class _HomeState extends State<Home> {
                         children: [
                           IconButton(
                             onPressed: () => onButtonPressed(
-                              'Laundry.json',
+                              'washfold',
                             ),
                             icon: Image.asset('assets/images/wash-fold.png'),
                             iconSize: 48,
@@ -236,7 +243,7 @@ class _HomeState extends State<Home> {
                         children: [
                           IconButton(
                             onPressed: () => onButtonPressed(
-                              'Laundry.json',
+                              'washiron',
                             ),
                             icon: Image.asset('assets/images/ironing.png'),
                             iconSize: 48,
@@ -266,7 +273,7 @@ class _HomeState extends State<Home> {
                                           Card(
                                             child: ListTile(
                                               onTap: () => onButtonPressed(
-                                                  'Dry_clean_female.json'),
+                                                  'drycleanfemale_heavy'),
                                               title: const Text(
                                                   'Female(Heavy Cloths)'),
                                             ),
@@ -274,7 +281,15 @@ class _HomeState extends State<Home> {
                                           Card(
                                             child: ListTile(
                                               onTap: () => onButtonPressed(
-                                                  'Dry_clean_male.json'),
+                                                  'drycleanfemale_light'),
+                                              title: const Text(
+                                                  'Female(Light Cloths)'),
+                                            ),
+                                          ),
+                                          Card(
+                                            child: ListTile(
+                                              onTap: () => onButtonPressed(
+                                                  'drycleanmale_heavy'),
                                               title: const Text(
                                                   'Male(Heavy Cloths)'),
                                             ),
@@ -282,17 +297,9 @@ class _HomeState extends State<Home> {
                                           Card(
                                             child: ListTile(
                                               onTap: () => onButtonPressed(
-                                                  'Dry_clean_men.json'),
+                                                  'drycleanmale_light'),
                                               title: const Text(
                                                   'Men(Light Cloths)'),
-                                            ),
-                                          ),
-                                          Card(
-                                            child: ListTile(
-                                              onTap: () => onButtonPressed(
-                                                  'Dry_clean_women.json'),
-                                              title: const Text(
-                                                  'Female(Light Cloths)'),
                                             ),
                                           ),
                                         ],
@@ -322,10 +329,12 @@ class _HomeState extends State<Home> {
                 const Align(
                   //alignment: Alignment.centerLeft,
                   child: Text(
-                    "Economical Services",
+                    "ECONOMICAL SERVICES",
                     style: TextStyle(
                       fontSize: 15,
-                      color: Color.fromARGB(255, 21, 88, 4),
+                      color: Color.fromARGB(255, 243, 152, 39),
+                      fontFamily: 'ANTON',
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -344,7 +353,7 @@ class _HomeState extends State<Home> {
                           children: [
                             IconButton(
                               onPressed: () => onButtonPressed(
-                                'Dry_clean_household.json',
+                                'houseclean',
                               ),
                               icon: Image.asset('assets/images/premium.png'),
                               iconSize: 50,
@@ -356,7 +365,7 @@ class _HomeState extends State<Home> {
                           children: [
                             IconButton(
                               onPressed: () => onButtonPressed(
-                                'Steam_iron.json',
+                                'steampress',
                               ),
                               icon: Image.asset('assets/images/steam-iron.png'),
                               iconSize: 48,
@@ -368,7 +377,7 @@ class _HomeState extends State<Home> {
                           children: [
                             IconButton(
                               onPressed: () => onButtonPressed(
-                                'car_wash.json',
+                                'carwash',
                               ),
                               icon: Image.asset('assets/images/car.png'),
                               iconSize: 48,
@@ -379,7 +388,7 @@ class _HomeState extends State<Home> {
                       ]),
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.15,
+                  height: MediaQuery.of(context).size.height * 0.12,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -387,7 +396,7 @@ class _HomeState extends State<Home> {
                         children: [
                           IconButton(
                             onPressed: () => onButtonPressed(
-                              'Shoes.json',
+                              'shoesclean',
                             ),
                             icon:
                                 Image.asset('assets/images/shoes-cleaning.png'),
@@ -400,7 +409,7 @@ class _HomeState extends State<Home> {
                         children: [
                           IconButton(
                             onPressed: () => onButtonPressed(
-                              'toy_wash.json',
+                              'toywash',
                             ),
                             icon: Image.asset('assets/images/bag.png'),
                             iconSize: 48,
@@ -412,7 +421,7 @@ class _HomeState extends State<Home> {
                         children: [
                           IconButton(
                             onPressed: () => onButtonPressed(
-                              'Scraching.json',
+                              'spotting',
                             ),
                             icon: Image.asset('assets/images/shirt.png'),
                             iconSize: 48,
@@ -424,83 +433,93 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 Expanded(
-                  child: Column(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        // decoration: BoxDecoration(
-                        //   borderRadius: BorderRadius.circular(30),
-                        // ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, SubscriptionScreen.id);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 20),
-                            //shape: CircleBorder(),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                          ),
-                          child: const Text(
-                            "Subscribe",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, BookingScreen.id);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 20),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            backgroundColor: Colors.orange,
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Book Now",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                            ],
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          // decoration: BoxDecoration(
+                          //   borderRadius: BorderRadius.circular(30),
+                          // ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                  context, SubscriptionScreen.id);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 50, vertical: 20),
+                              //shape: CircleBorder(),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                            ),
+                            child: const Text(
+                              "Buy Subscription",
+                              style: TextStyle(fontSize: 20),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 10),
+                        Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, BookingScreen.id);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 50, vertical: 20),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                              backgroundColor: Colors.orange,
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Book Now",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               ],
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
+        floatingActionButton: InkWell(
+          onTap: () {
             Navigator.pushNamed(context, ChatbotApp.id);
           },
-          backgroundColor: Colors.white,
-          elevation: 0,
-          child: Stack(
-            children: [
-              Image.asset(
-                'assets/images/chatbot.png',
-                width: 54,
-                height: 54,
-              ),
-            ],
+          child: Container(
+            width: 70,
+            height: 70,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+            ),
+            child: Stack(
+              children: [
+                Image.asset(
+                  'assets/images/chatbot.gif',
+                  width: 70,
+                  height: 70,
+                ),
+              ],
+            ),
           ),
         ),
-        bottomNavigationBar: const BottomBar(),
+        bottomNavigationBar: const BottomBar(
+          selectedIndex: 0,
+        ),
       ),
     );
   }

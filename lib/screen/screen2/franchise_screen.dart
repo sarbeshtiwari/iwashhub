@@ -1,10 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
-
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
+import 'package:mysql1/mysql1.dart';
+import 'package:http/http.dart' as http;
 
 class FranchiseScreen extends StatefulWidget {
   const FranchiseScreen({Key? key}) : super(key: key);
@@ -22,10 +20,12 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
   void initState() {
     super.initState();
     final DateTime now = DateTime.now();
-    formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+    formattedDate = DateFormat('yyyy-MM-dd - kk:mm').format(now);
   }
 
   bool validate = false;
+  bool _value1 = false;
+  bool _value2 = false;
   var countryCodeController = TextEditingController(text: '+91');
   final _formKey = GlobalKey<FormState>();
   var formattedDate = '';
@@ -38,54 +38,108 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
   Future<void> _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final url = Uri.https(
-          'iwash-d6737-default-rtdb.firebaseio.com', 'franchise-list.json');
-      try {
-        final response = await http.post(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: json.encode(
-            {
-              'Name': _enteredName,
-              'Phonenumber': _enteredPhoneNumber,
-              'Email': _enteredEmail,
-              'Date & Time': formattedDate,
-              'Profession': _profession,
-              'City': _city,
-            },
+      final ConnectionSettings settings = ConnectionSettings(
+        host: 'srv665.hstgr.io',
+        port: 3306,
+        user: 'u332079037_iwashhubonline',
+        password: 'Iwashhub@123',
+        db: 'u332079037_iwashhubapp',
+      );
+      final MySqlConnection conn = await MySqlConnection.connect(settings);
+      //change table name here
+      await conn.query('''
+CREATE TABLE IF NOT EXISTS franchise ( 
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  Name VARCHAR(255) NOT NULL, 
+  PhoneNumber VARCHAR(255) NOT NULL,  
+  Email VARCHAR(255) NOT NULL,
+  Profession VARCHAR(255) NOT NULL,  
+  City VARCHAR(255) NOT NULL,
+  Eco VARCHAR(7), 
+  Elite VARCHAR(7),  
+  Date_Time VARCHAR(255) NOT NULL  
+)
+''');
+
+      final result = await conn.query(
+        'INSERT INTO franchise (Name, PhoneNumber, Email, Profession, City, Eco, Elite, Date_Time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          _enteredName,
+          _enteredPhoneNumber,
+          _enteredEmail,
+          _profession,
+          _city,
+          _value1,
+          _value2,
+          formattedDate,
+        ],
+      );
+      await conn.close();
+      if (result.affectedRows! > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data sent successfully!'),
           ),
         );
-        if (response.statusCode == 200) {
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Data sent successfully!')),
-          );
-          setState(() {
-            _enteredName = '';
-            _enteredPhoneNumber = '';
-            _enteredEmail = '';
-            _profession = '';
-            _city = '';
-            _formKey.currentState!.reset();
-          });
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please try again')),
-          );
-          setState(() {
-            _enteredName = '';
-            _enteredPhoneNumber = '';
-            _enteredEmail = '';
-            _profession = '';
-            _city = '';
-            _formKey.currentState!.reset();
-          });
-        }
-      } catch (error) {
-        // Handle error
+        sendSMS(
+            'Thanks for making enquiry for iwashhub franchisee business. Get connected with us to know more. Call 7307108685 IWASHB',
+            _enteredPhoneNumber);
+        setState(() {
+          // Reset form fields
+          _enteredName = '';
+          _enteredPhoneNumber = '';
+          _enteredEmail = '';
+          _profession = '';
+          _city = '';
+          _value1 = false;
+          _value2 = false;
+          _formKey.currentState!.reset();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please try again')),
+        );
+        setState(() {
+          _enteredName = '';
+          _enteredPhoneNumber = '';
+          _enteredEmail = '';
+          _profession = '';
+          _city = '';
+          _value1;
+          _value2;
+          _formKey.currentState!.reset();
+        });
       }
+    }
+  }
+
+  // ignore: no_leading_underscores_for_local_identifiers
+  void sendSMS(String message, _enteredPhoneNumber) async {
+    // Set the base URL
+    String url = 'http://smsw.co.in/API/WebSMS/Http/v1.0a/index.php';
+    // Set the query parameters
+    Map<String, String> queryParams = {
+      'username': 'Asepsis',
+      'password': '4d436c-78a08',
+      'sender': 'IWASHB',
+      'to': _enteredPhoneNumber,
+      'message': message,
+      'reqid': '1',
+      'format': '{json|text}',
+      'pe_id': '1201159146626171588',
+      'template_id': '1407166401065038909',
+    };
+
+    // Construct the full URL with query parameters
+    Uri uri = Uri.parse(url).replace(queryParameters: queryParams);
+
+    // Make the HTTP POST request
+    http.Response response = await http.post(uri);
+
+    // Check the response
+    if (response.statusCode == 200) {
+    } else {
+      //print('Failed to send SMS: ${response.body}');
     }
   }
 
@@ -96,7 +150,7 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
         title: const Text('Become a Store Partner'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Expanded(
@@ -107,19 +161,15 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       TextFormField(
-                        maxLength: 50,
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person_outline_outlined),
-                          labelText: "Name",
-                          hintText: "Enter your Name",
-                          border: OutlineInputBorder(),
+                          labelText: "Full Name",
                         ),
                         validator: (value) {
                           if (value == null ||
                               value.isEmpty ||
                               value.trim().length <= 1 ||
                               value.trim().length > 50) {
-                            return 'Must be between 1 and 50 characters.';
+                            return 'Please Enter correct name.';
                           }
                           return null;
                         },
@@ -131,16 +181,12 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
                         height: 10,
                       ),
                       TextFormField(
-                        maxLength: 50,
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person_outline_outlined),
                           labelText: "Job Title",
-                          hintText: "Profession/ Job Title",
-                          border: OutlineInputBorder(),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter a value.';
+                            return 'Please Enter your Profession';
                           }
                           return null;
                         },
@@ -152,16 +198,30 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
                         height: 10,
                       ),
                       TextFormField(
-                        maxLength: 50,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.location_city),
-                          labelText: "City",
-                          hintText: "City",
-                          border: OutlineInputBorder(),
+                          labelText: "Email",
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter a value.';
+                            return 'Please enter a valid email.';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _enteredEmail = value!;
+                        },
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: "Intrested City",
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter City.';
                           }
                           return null;
                         },
@@ -178,78 +238,69 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
                               value.isEmpty ||
                               value.trim().length <= 1 ||
                               value.trim().length > 10) {
-                            return 'Please enter a valid phone number.';
+                            return 'Please enter a valid mobile number.';
                           }
                           return null;
                         },
                         onSaved: (value) {
                           _enteredPhoneNumber = value!;
                         },
-                        maxLength: 10,
                         keyboardType: TextInputType.phone,
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.phone_iphone_outlined),
-                          labelText: 'Phone Number',
-                          hintText: 'Enter Your Phone number',
-                          border: OutlineInputBorder(),
+                          labelText: 'Mobile Number',
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.email_outlined),
-                          labelText: "Email",
-                          hintText: "Enter your Email",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a valid email.';
-                          }
-                          return null;
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Text("Choose a option"),
+                      CheckboxListTile(
+                        title: const Text('Eco'),
+                        value: _value1,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _value1 = value ?? false;
+                          });
                         },
-                        onSaved: (value) {
-                          _enteredEmail = value!;
+                      ),
+                      CheckboxListTile(
+                        title: const Text('Elite'),
+                        value: _value2,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _value2 = value ?? false;
+                          });
                         },
                       ),
                       const SizedBox(
                         height: 20,
                       ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _saveItem,
-                          style: ElevatedButton.styleFrom(
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _saveItem,
+                            style: ElevatedButton.styleFrom(
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(20),
+                                ),
                               ),
+                              elevation: 0,
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.orange,
                             ),
-                            elevation: 0,
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.black,
-                            side: const BorderSide(color: Colors.black),
-                            padding: const EdgeInsets.symmetric(vertical: 20.0),
+                            child: const Text(
+                              "Raise Your Query",
+                              style: TextStyle(fontSize: 20),
+                            ),
                           ),
-                          child: const Text("Submit"),
-                        ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              "Contact Us:- 8948310077\n Mail:- info@iwashhub.com",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(
-              height: 10,
             ),
           ],
         ),
