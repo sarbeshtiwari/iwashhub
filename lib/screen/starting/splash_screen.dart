@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iwash/screen/starting/crash_screen.dart';
 import 'package:iwash/screen/starting/initial_screen.dart';
 
 class SplashScreen extends StatefulWidget {

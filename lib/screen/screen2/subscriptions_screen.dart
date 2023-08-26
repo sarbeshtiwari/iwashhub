@@ -5,7 +5,8 @@ import 'package:iwash/screen/main/profile_screen.dart';
 import 'package:iwash/screen/screen2/PaymentSuccessful.dart';
 import 'package:iwash/screen/screen2/PaymentUnsuccessful.dart';
 import 'package:mysql1/mysql1.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:payu_checkoutpro_flutter/payu_checkoutpro_flutter.dart';
+import 'package:payu_checkoutpro_flutter/PayUConstantKeys.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -15,50 +16,138 @@ class SubscriptionScreen extends StatefulWidget {
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
 }
 
-class _SubscriptionScreenState extends State<SubscriptionScreen> {
-  late Razorpay _razorpay;
+class _SubscriptionScreenState extends State<SubscriptionScreen>
+    implements PayUCheckoutProProtocol {
+  //late Razorpay _razorpay;
+  late PayUCheckoutProFlutter _checkoutPro;
   int? userId;
   String subscriptiontype = '';
   String selectedState = '';
   String student = '';
   String family01 = '';
   String family02 = '';
+
   @override
   void initState() {
     super.initState();
+    _checkoutPro = PayUCheckoutProFlutter(this);
     fetchstateList();
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+
+    //   _razorpay = Razorpay();
+    //   _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    //   _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            PaymentSuccessful(subscriptiontype: subscriptiontype),
-      ),
-    );
-    //Navigator.pushsubscriptiontyped(context, PaymentSuccessful.id);
-    // Handle successful payment here
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    Navigator.pushNamed(context, PaymentUnsuccessful.id);
-    // Handle payment failure here
-  }
+  //work on line 45 to line 102
 
   void _startPayment(int amount, String subscriptiontype, String description) {
-    var options = {
-      'key': 'rzp_test_xYMEVhzwkXuBN8',
-      'amount': amount * 100, // in paise
-      'subscriptiontype': subscriptiontype,
-      'description': description,
+    var payUPaymentParams = {
+      PayUPaymentParamKey.key: "QZh29fQh", //REQUIRED
+      PayUPaymentParamKey.amount: "1", //REQUIRED
+      PayUPaymentParamKey.productInfo: "Info", //REQUIRED
+      PayUPaymentParamKey.firstName: "Abc", //REQUIRED
+      PayUPaymentParamKey.email: "test@gmail.com", //REQUIRED
+      PayUPaymentParamKey.phone: "9999999999", //REQUIRED
+      PayUPaymentParamKey.ios_surl:
+          "https://pub.dev/packages/payu_checkoutpro_flutter/example", //REQUIRED
+      PayUPaymentParamKey.ios_furl:
+          "https://pub.dev/packages/payu_checkoutpro_flutter/example", //REQUIRED
+      PayUPaymentParamKey.android_surl:
+          "https://pub.dev/packages/payu_checkoutpro_flutter/example", //REQUIRED
+      PayUPaymentParamKey.android_furl:
+          "https://pub.dev/packages/payu_checkoutpro_flutter/example", //REQUIRED
+      PayUPaymentParamKey.environment: "1", //0 => Production 1 => Test
+
+      PayUPaymentParamKey.transactionId: "11", //REQUIRED
     };
 
-    _razorpay.open(options);
+    var payUConfigParams = {
+      PayUCheckoutProConfigKeys.showExitConfirmationOnPaymentScreen: true,
+      PayUCheckoutProConfigKeys.showExitConfirmationOnCheckoutScreen: true,
+    };
+
+    _checkoutPro.openCheckoutScreen(
+        payUPaymentParams: payUPaymentParams,
+        payUCheckoutProConfig: payUConfigParams);
   }
+
+  @override
+  void generateHash(Map response) {
+    // Pass response param to your backend server
+    // Backend will generate the hash which you need to pass to SDK
+    // hashResponse: is the response which you get from your server
+    Map hashResponse = {};
+    _checkoutPro.hashGenerated(hash: hashResponse);
+  }
+
+  @override
+  void onPaymentSuccess(dynamic response) {
+    //Handle Success response
+  }
+
+  @override
+  void onPaymentFailure(dynamic response) {
+    //Handle Failure response
+  }
+
+  @override
+  void onPaymentCancel(Map? response) {
+    //Handle Payment cancel response
+  }
+
+  @override
+  void onError(Map? response) {
+    //Handle on error response
+  }
+  // void _handlePaymentSuccess(PaymentSuccessResponse response) {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) =>
+  //           PaymentSuccessful(subscriptiontype: subscriptiontype),
+  //     ),
+  //   );
+  //   //Navigator.pushsubscriptiontyped(context, PaymentSuccessful.id);
+  //   // Handle successful payment here
+  // }
+
+  // void _handlePaymentError(PaymentFailureResponse response) {
+  //   Navigator.pushNamed(context, PaymentUnsuccessful.id);
+  //   // Handle payment failure here
+  // }
+  // void _startPayment(
+  //     int amount, String subscriptiontype, String description) async {
+  //   final data = await payu.buildPaymentParams(
+  //       amount: "400.0",
+  //       transactionId: "C2161646224785587",
+  //       phone: "8707828835",
+  //       productInfo: "Nike shoes",
+  //       firstName: "Badal Sharma",
+  //       email: "badal@gmail.com",
+  //       hash: "DMrNcDBXqUoxo8jhcOypx89aAFmscGYZ0BinJGFeqGc=",
+  //       isProduction: false,
+  //       userCredentials: "7899395319",
+  //       merchantKey: "QZh29fQh",
+  //       salt: "Lfn53rLakq",
+  //       merchantName: "Siply Services Pvt Ltd.");
+  // }
+  // void _startPayment(
+  //     int amount, String subscriptiontype, String description) async {
+  //   // // Every Transaction should have a unique ID. I am using timestamp as transactionid. Because its always unique :)
+  //   String orderId = DateTime.now().millisecondsSinceEpoch.toString();
+  //   // Amount is in rs. Enter 100 for Rs100.
+  //   final String amount = "1";
+
+  // void _startPayment(int amount, String subscriptiontype, String description) {
+  //   var options = {
+  //     'key': 'rzp_test_xYMEVhzwkXuBN8',
+  //     'amount': amount * 100, // in paise
+  //     'subscriptiontype': subscriptiontype,
+  //     'description': description,
+  //   };
+
+  //   _razorpay.open(options);
+  // }
 
   List<String> stateList = [];
   String stateListText = '';

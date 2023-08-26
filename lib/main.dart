@@ -8,6 +8,7 @@ import 'package:iwash/screen/screen2/franchise.dart';
 import 'package:iwash/screen/screen2/loyalty_point.dart';
 import 'package:iwash/screen/screen2/previous_order.dart';
 import 'package:iwash/screen/screen2/referral_screen.dart';
+import 'package:iwash/screen/starting/crash_screen.dart';
 import 'package:iwash/services/Chat.dart';
 import 'package:iwash/API/fetch_data.dart';
 import 'package:iwash/screen/main/home.dart';
@@ -98,6 +99,7 @@ class MyApp extends StatelessWidget {
 
               //to be remove
               UploadData.id: (context) => const UploadData(),
+              CrashScreen.id: (context) => const CrashScreen(),
             });
       },
     );

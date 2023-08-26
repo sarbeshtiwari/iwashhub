@@ -1,15 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
     package="com.app.iwash">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" /> 
 
 
 
    <application
         android:label="iWASH HUB"
         android:name="${applicationName}"
-        
+        tools:replace="android:label"
         android:icon="@mipmap/ic_launcher">
         <service android:name="com.app.iwash.MyFirebaseMessagingService" android:exported="false">
             <intent-filter>
@@ -45,5 +47,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+     android:name="payu_web_service_url"
+     android:value="https://test.payu.in" />
+ <meta-data
+     android:name="payu_post_url"
+     android:value="https://test.payu.in" />
     </application>
 </manifest>
