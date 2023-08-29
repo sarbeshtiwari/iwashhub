@@ -40,27 +40,14 @@ dependencies:
   flutter_native_splash: ^2.2.18
   animated_text_kit: ^4.2.2
   flutter_signin_button: ^2.0.0
-  firebase_core: ^2.14.0    #to be remove later
-  firebase_auth: ^4.6.2   #to be remove later
   progress_dialog_null_safe: ^1.0.7
-  location: ^4.4.0    #to be remove later
-  geocoding: ^2.1.0   #to be remove later
-  intl_phone_field: ^3.1.0    #to be remove later
-  cloud_firestore: ^4.8.1   #to be remove later
   liquid_swipe: ^3.0.0
   smooth_page_indicator: ^1.0.0+2
   flutter_otp_text_field: ^1.1.1
-  get: ^4.4.3   #to be remove later
-  http: ^1.1.0    #to be remove later
   intl: ^0.18.1
-  geolocator: ^9.0.2    #to be remove later
-  firebase_database: any    #to be remove later
   shared_preferences: ^2.0.12
   bubble: ^1.2.1
-  firebase_storage: ^11.1.0  #to be remove later
-  image_picker: ^1.0.0    #to be remove later
   getwidget: ^3.1.1   
-  firebase_messaging: any   #to be remove later
   url_launcher: ^6.1.12
   mysql1: ^0.20.0
   sms_autofill: ^2.3.0
