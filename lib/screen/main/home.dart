@@ -239,199 +239,199 @@ class _HomeState extends State<Home> {
                           const Text('Wash & fold'),
                         ],
                       ),
-                      Column(
-                        children: [
-                          IconButton(
-                            onPressed: () => onButtonPressed(
-                              'washiron',
-                            ),
-                            icon: Image.asset('assets/images/ironing.png'),
-                            iconSize: 48,
-                          ),
-                          const Text('Wash & Iron'),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(10),
-                                      ),
-                                    ),
-                                    title: const Text('Dry Clean',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                    content: SingleChildScrollView(
-                                      child: ListBody(
-                                        children: <Widget>[
-                                          Card(
-                                            child: ListTile(
-                                              onTap: () => onButtonPressed(
-                                                  'drycleanfemale_heavy'),
-                                              title: const Text(
-                                                  'Female(Heavy Cloths)'),
-                                            ),
-                                          ),
-                                          Card(
-                                            child: ListTile(
-                                              onTap: () => onButtonPressed(
-                                                  'drycleanfemale_light'),
-                                              title: const Text(
-                                                  'Female(Light Cloths)'),
-                                            ),
-                                          ),
-                                          Card(
-                                            child: ListTile(
-                                              onTap: () => onButtonPressed(
-                                                  'drycleanmale_heavy'),
-                                              title: const Text(
-                                                  'Male(Heavy Cloths)'),
-                                            ),
-                                          ),
-                                          Card(
-                                            child: ListTile(
-                                              onTap: () => onButtonPressed(
-                                                  'drycleanmale_light'),
-                                              title: const Text(
-                                                  'Men(Light Cloths)'),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: const Text('Close'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            icon: Image.asset('assets/images/dry-cleaning.png'),
-                            iconSize: 50,
-                          ),
-                          const Text('Dry Clean'),
-                        ],
-                      ),
+                      // Column(
+                      //   children: [
+                      //     IconButton(
+                      //       onPressed: () => onButtonPressed(
+                      //         'washiron',
+                      //       ),
+                      //       icon: Image.asset('assets/images/ironing.png'),
+                      //       iconSize: 48,
+                      //     ),
+                      //     const Text('Wash & Iron'),
+                      //   ],
+                      // ),
+                      // Column(
+                      //   children: [
+                      //     IconButton(
+                      //       onPressed: () {
+                      //         showDialog(
+                      //           context: context,
+                      //           builder: (BuildContext context) {
+                      //             return AlertDialog(
+                      //               shape: const RoundedRectangleBorder(
+                      //                 borderRadius: BorderRadius.all(
+                      //                   Radius.circular(10),
+                      //                 ),
+                      //               ),
+                      //               title: const Text('Dry Clean',
+                      //                   style: TextStyle(
+                      //                       fontWeight: FontWeight.bold)),
+                      //               content: SingleChildScrollView(
+                      //                 child: ListBody(
+                      //                   children: <Widget>[
+                      //                     Card(
+                      //                       child: ListTile(
+                      //                         onTap: () => onButtonPressed(
+                      //                             'drycleanfemale_heavy'),
+                      //                         title: const Text(
+                      //                             'Female(Heavy Cloths)'),
+                      //                       ),
+                      //                     ),
+                      //                     Card(
+                      //                       child: ListTile(
+                      //                         onTap: () => onButtonPressed(
+                      //                             'drycleanfemale_light'),
+                      //                         title: const Text(
+                      //                             'Female(Light Cloths)'),
+                      //                       ),
+                      //                     ),
+                      //                     Card(
+                      //                       child: ListTile(
+                      //                         onTap: () => onButtonPressed(
+                      //                             'drycleanmale_heavy'),
+                      //                         title: const Text(
+                      //                             'Male(Heavy Cloths)'),
+                      //                       ),
+                      //                     ),
+                      //                     Card(
+                      //                       child: ListTile(
+                      //                         onTap: () => onButtonPressed(
+                      //                             'drycleanmale_light'),
+                      //                         title: const Text(
+                      //                             'Men(Light Cloths)'),
+                      //                       ),
+                      //                     ),
+                      //                   ],
+                      //                 ),
+                      //               ),
+                      //               actions: <Widget>[
+                      //                 TextButton(
+                      //                   child: const Text('Close'),
+                      //                   onPressed: () {
+                      //                     Navigator.of(context).pop();
+                      //                   },
+                      //                 ),
+                      //               ],
+                      //             );
+                      //           },
+                      //         );
+                      //       },
+                      //       icon: Image.asset('assets/images/dry-cleaning.png'),
+                      //       iconSize: 50,
+                      //     ),
+                      //     const Text('Dry Clean'),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),
-                const Align(
-                  //alignment: Alignment.centerLeft,
-                  child: Text(
-                    "ECONOMICAL SERVICES",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Color.fromARGB(255, 243, 152, 39),
-                      fontFamily: 'ANTON',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(
-                    top: 12,
-                    bottom: 2,
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.12,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          children: [
-                            IconButton(
-                              onPressed: () => onButtonPressed(
-                                'houseclean',
-                              ),
-                              icon: Image.asset('assets/images/premium.png'),
-                              iconSize: 50,
-                            ),
-                            const Text('Home Clean'),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            IconButton(
-                              onPressed: () => onButtonPressed(
-                                'steampress',
-                              ),
-                              icon: Image.asset('assets/images/steam-iron.png'),
-                              iconSize: 48,
-                            ),
-                            const Text('Steam Press'),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            IconButton(
-                              onPressed: () => onButtonPressed(
-                                'carwash',
-                              ),
-                              icon: Image.asset('assets/images/car.png'),
-                              iconSize: 48,
-                            ),
-                            const Text('Car Wash'),
-                          ],
-                        ),
-                      ]),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.12,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
-                        children: [
-                          IconButton(
-                            onPressed: () => onButtonPressed(
-                              'shoesclean',
-                            ),
-                            icon:
-                                Image.asset('assets/images/shoes-cleaning.png'),
-                            iconSize: 48,
-                          ),
-                          const Text('Shoe Clean'),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          IconButton(
-                            onPressed: () => onButtonPressed(
-                              'toywash',
-                            ),
-                            icon: Image.asset('assets/images/bag.png'),
-                            iconSize: 48,
-                          ),
-                          const Text('Toy Wash'),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          IconButton(
-                            onPressed: () => onButtonPressed(
-                              'spotting',
-                            ),
-                            icon: Image.asset('assets/images/shirt.png'),
-                            iconSize: 48,
-                          ),
-                          const Text('Spotting'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                // const Align(
+                //   //alignment: Alignment.centerLeft,
+                //   child: Text(
+                //     "ECONOMICAL SERVICES",
+                //     style: TextStyle(
+                //       fontSize: 15,
+                //       color: Color.fromARGB(255, 243, 152, 39),
+                //       fontFamily: 'ANTON',
+                //       fontWeight: FontWeight.w500,
+                //     ),
+                //   ),
+                // ),
+                // const Padding(
+                //   padding: EdgeInsets.only(
+                //     top: 12,
+                //     bottom: 2,
+                //   ),
+                // ),
+                // SizedBox(
+                //   height: MediaQuery.of(context).size.height * 0.12,
+                //   child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //       children: [
+                //         Column(
+                //           children: [
+                //             IconButton(
+                //               onPressed: () => onButtonPressed(
+                //                 'houseclean',
+                //               ),
+                //               icon: Image.asset('assets/images/premium.png'),
+                //               iconSize: 50,
+                //             ),
+                //             const Text('Home Clean'),
+                //           ],
+                //         ),
+                //         Column(
+                //           children: [
+                //             IconButton(
+                //               onPressed: () => onButtonPressed(
+                //                 'steampress',
+                //               ),
+                //               icon: Image.asset('assets/images/steam-iron.png'),
+                //               iconSize: 48,
+                //             ),
+                //             const Text('Steam Press'),
+                //           ],
+                //         ),
+                //         Column(
+                //           children: [
+                //             IconButton(
+                //               onPressed: () => onButtonPressed(
+                //                 'carwash',
+                //               ),
+                //               icon: Image.asset('assets/images/car.png'),
+                //               iconSize: 48,
+                //             ),
+                //             const Text('Car Wash'),
+                //           ],
+                //         ),
+                //       ]),
+                // ),
+                // SizedBox(
+                //   height: MediaQuery.of(context).size.height * 0.12,
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //     children: [
+                //       Column(
+                //         children: [
+                //           IconButton(
+                //             onPressed: () => onButtonPressed(
+                //               'shoesclean',
+                //             ),
+                //             icon:
+                //                 Image.asset('assets/images/shoes-cleaning.png'),
+                //             iconSize: 48,
+                //           ),
+                //           const Text('Shoe Clean'),
+                //         ],
+                //       ),
+                //       Column(
+                //         children: [
+                //           IconButton(
+                //             onPressed: () => onButtonPressed(
+                //               'toywash',
+                //             ),
+                //             icon: Image.asset('assets/images/bag.png'),
+                //             iconSize: 48,
+                //           ),
+                //           const Text('Toy Wash'),
+                //         ],
+                //       ),
+                //       Column(
+                //         children: [
+                //           IconButton(
+                //             onPressed: () => onButtonPressed(
+                //               'spotting',
+                //             ),
+                //             icon: Image.asset('assets/images/shirt.png'),
+                //             iconSize: 48,
+                //           ),
+                //           const Text('Spotting'),
+                //         ],
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(

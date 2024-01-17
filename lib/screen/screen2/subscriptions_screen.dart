@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:ui';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:iwash/screen/main/profile_screen.dart';
 import 'package:iwash/screen/screen2/PaymentSuccessful.dart';
@@ -7,6 +9,7 @@ import 'package:iwash/screen/screen2/PaymentUnsuccessful.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:payu_checkoutpro_flutter/payu_checkoutpro_flutter.dart';
 import 'package:payu_checkoutpro_flutter/PayUConstantKeys.dart';
+import 'package:http/http.dart' as http;
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -14,6 +17,139 @@ class SubscriptionScreen extends StatefulWidget {
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
+}
+
+class PayUTestCredentials {
+  static const merchantKey = "QZh29fQh"; //TODO: Add Merchant Key
+  //Use your success and fail URL's.
+
+  static const iosSurl =
+      "https://payu.herokuapp.com/ios_success"; //TODO: Add Success URL.
+  static const iosFurl =
+      "https://payu.herokuapp.com/ios_failure"; //TODO Add Fail URL.
+  static const androidSurl =
+      "https://payu.herokuapp.com/success"; //TODO: Add Success URL.
+  static const androidFurl =
+      "https://payu.herokuapp.com/failure"; //TODO Add Fail URL.
+}
+
+class PayUParams {
+  static Map createPayUPaymentParams() {
+    var siParams = {
+      PayUSIParamsKeys.isFreeTrial: true,
+      PayUSIParamsKeys.billingAmount: '1', //Required
+      PayUSIParamsKeys.billingInterval: 1, //Required
+      PayUSIParamsKeys.paymentStartDate: '2023-04-20', //Required
+      PayUSIParamsKeys.paymentEndDate: '2023-04-30', //Required
+      PayUSIParamsKeys.billingCycle: //Required
+          'daily', //Can be any of 'daily','weekly','yearly','adhoc','once','monthly'
+      PayUSIParamsKeys.remarks: 'Test SI transaction',
+      PayUSIParamsKeys.billingCurrency: 'INR',
+      PayUSIParamsKeys.billingLimit: 'ON', //ON, BEFORE, AFTER
+      PayUSIParamsKeys.billingRule: 'MAX', //MAX, EXACT
+    };
+
+    var additionalParam = {
+      PayUAdditionalParamKeys.udf1: "udf1",
+      PayUAdditionalParamKeys.udf2: "udf2",
+      PayUAdditionalParamKeys.udf3: "udf3",
+      PayUAdditionalParamKeys.udf4: "udf4",
+      PayUAdditionalParamKeys.udf5: "udf5",
+    };
+
+    var spitPaymentDetails = {
+      "type": "absolute",
+      "splitInfo": {
+        PayUTestCredentials.merchantKey: {
+          "aggregatorSubTxnId":
+              "1234567540099887766650092", //unique for each transaction
+          "aggregatorSubAmt": "1"
+        },
+        /* "qOoYIv": {
+          "aggregatorSubTxnId": "12345678",
+          "aggregatorSubAmt": "40"
+       },*/
+      }
+    };
+
+    var payUPaymentParams = {
+      PayUPaymentParamKey.key: PayUTestCredentials.merchantKey,
+      PayUPaymentParamKey.amount: "1",
+      PayUPaymentParamKey.productInfo: "Info",
+      PayUPaymentParamKey.firstName: "Abc",
+      PayUPaymentParamKey.email: "test@gmail.com",
+      PayUPaymentParamKey.phone: "9999999999",
+      PayUPaymentParamKey.ios_surl: PayUTestCredentials.iosSurl,
+      PayUPaymentParamKey.ios_furl: PayUTestCredentials.iosFurl,
+      PayUPaymentParamKey.android_surl: PayUTestCredentials.androidSurl,
+      PayUPaymentParamKey.android_furl: PayUTestCredentials.androidFurl,
+      PayUPaymentParamKey.environment: "1", //0 => Production 1 => Test
+      PayUPaymentParamKey.userCredential:
+          null, //TODO: Pass user credential to fetch saved cards => A:B - Optional
+      PayUPaymentParamKey.transactionId:
+          DateTime.now().millisecondsSinceEpoch.toString(),
+      PayUPaymentParamKey.additionalParam: additionalParam,
+      PayUPaymentParamKey.enableNativeOTP: true,
+      // PayUPaymentParamKey.splitPaymentDetails:json.encode(spitPaymentDetails),
+      PayUPaymentParamKey.userToken:
+          "", //TODO: Pass a unique token to fetch offers. - Optional
+    };
+
+    return payUPaymentParams;
+  }
+
+  static Map createPayUConfigParams() {
+    var paymentModesOrder = [
+      {"Wallets": "PHONEPE"},
+      {"UPI": "TEZ"},
+      {"Wallets": ""},
+      {"EMI": ""},
+      {"NetBanking": ""},
+    ];
+
+    var cartDetails = [
+      {"GST": "5%"},
+      {"Delivery Date": "25 Dec"},
+      {"Status": "In Progress"}
+    ];
+    var enforcePaymentList = [
+      {"payment_type": "CARD", "enforce_ibiboCode": "UTIBENCC"},
+    ];
+
+    var customNotes = [
+      {
+        "custom_note": "Its Common custom note for testing purpose",
+        "custom_note_category": [
+          PayUPaymentTypeKeys.emi,
+          PayUPaymentTypeKeys.card
+        ]
+      },
+      {
+        "custom_note": "Payment options custom note",
+        "custom_note_category": null
+      }
+    ];
+
+    var payUCheckoutProConfig = {
+      PayUCheckoutProConfigKeys.primaryColor: "#4994EC",
+      PayUCheckoutProConfigKeys.secondaryColor: "#FFFFFF",
+      PayUCheckoutProConfigKeys.merchantName: "PayU",
+      PayUCheckoutProConfigKeys.merchantLogo: "logo",
+      PayUCheckoutProConfigKeys.showExitConfirmationOnCheckoutScreen: true,
+      PayUCheckoutProConfigKeys.showExitConfirmationOnPaymentScreen: true,
+      PayUCheckoutProConfigKeys.cartDetails: cartDetails,
+      PayUCheckoutProConfigKeys.paymentModesOrder: paymentModesOrder,
+      PayUCheckoutProConfigKeys.merchantResponseTimeout: 30000,
+      PayUCheckoutProConfigKeys.customNotes: customNotes,
+      PayUCheckoutProConfigKeys.autoSelectOtp: true,
+      // PayUCheckoutProConfigKeys.enforcePaymentList: enforcePaymentList,
+      PayUCheckoutProConfigKeys.waitingTime: 30000,
+      PayUCheckoutProConfigKeys.autoApprove: true,
+      PayUCheckoutProConfigKeys.merchantSMSPermission: true,
+      PayUCheckoutProConfigKeys.showCbToolbar: true,
+    };
+    return payUCheckoutProConfig;
+  }
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen>
@@ -40,7 +176,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
   //work on line 45 to line 102
 
-  void _startPayment(int amount, String subscriptiontype, String description) {
+  void _startPayment(
+      int amount, String subscriptiontype, String description) async {
     var payUPaymentParams = {
       PayUPaymentParamKey.key: "QZh29fQh", //REQUIRED
       PayUPaymentParamKey.amount: "1", //REQUIRED
@@ -72,33 +209,51 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
   }
 
   @override
-  void generateHash(Map response) {
+  generateHash(Map response) async {
     // Pass response param to your backend server
     // Backend will generate the hash which you need to pass to SDK
     // hashResponse: is the response which you get from your server
-    Map hashResponse = {};
+     // Pass response param to your backend server
+  var url = '<YOUR_BACKEND_SERVER_URL>';
+  var response1 = await http.post(
+    Uri.parse(url),
+    body: jsonEncode(response),
+    headers: {'Content-Type': 'application/json'},
+  );
+  // Backend will generate the hash which you need to pass to SDK
+  // hashResponse: is the response which you get from your server
+  Map hashResponse = jsonDecode(response1.body);
+    //Map hashResponse = {};
+    print(hashResponse);
     _checkoutPro.hashGenerated(hash: hashResponse);
   }
 
   @override
   void onPaymentSuccess(dynamic response) {
+    print("Success");
     //Handle Success response
   }
 
   @override
   void onPaymentFailure(dynamic response) {
+    print("Failed");
     //Handle Failure response
   }
 
   @override
   void onPaymentCancel(Map? response) {
+    print("Canceled");
     //Handle Payment cancel response
   }
 
   @override
   void onError(Map? response) {
+    print("Error: $response");
+    print("Noyt");
+    return;
     //Handle on error response
   }
+
   // void _handlePaymentSuccess(PaymentSuccessResponse response) {
   //   Navigator.push(
   //     context,
@@ -344,15 +499,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                       right: 10,
                       child: FloatingActionButton(
                         heroTag: 'uniqueTag1',
-                        onPressed: () {
+                        onPressed: () async {
                           if (student == "") {
                             showStateSelectionDialog(context);
                           } else {
                             int amount = int.parse(student); //change in paise
                             subscriptiontype = 'STUDENT LAUNDRY CARD';
                             String description = "STUDENT LAUNDRY CARD";
-                            _startPayment(
-                                amount, subscriptiontype, description);
+                            _checkoutPro.openCheckoutScreen(
+                              payUPaymentParams:
+                                  PayUParams.createPayUPaymentParams(),
+                              payUCheckoutProConfig:
+                                  PayUParams.createPayUConfigParams(),
+                            );
+                            // _startPayment(
+                            //     amount, subscriptiontype, description);
                           }
                         },
                         backgroundColor: Colors.orange,
@@ -514,5 +675,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         ]),
       ),
     );
+  }
+}
+
+class HashService {
+  static generateHash(Map<dynamic, dynamic> data) {
+    // Convert the data map to a JSON string
+    String jsonData = jsonEncode(data);
+
+    // Generate the SHA-256 hash of the JSON data
+    Digest hash = sha256.convert(utf8.encode(jsonData));
+
+    // Return the hash as a hexadecimal string
+    return hash.toString();
   }
 }

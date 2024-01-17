@@ -35,7 +35,8 @@ class PhoneAuthService {
     Map<String, String> queryParams = {
       'username': 'Asepsis',
       'password': '4d436c-78a08',
-      'sender': 'IWASHB',
+      'sender': 'ASEPSI',
+      //'sender': 'IWASHB',
       'to': number,
       'message':
           'OTP for iWash Hub App Login is $otp and valid till 5 minutes. Do Not Share This OTP To Anyone. IWASHB',
@@ -44,6 +45,10 @@ class PhoneAuthService {
       'pe_id': '1201159146626171588',
       'template_id': '1407168933746363488',
     };
+//http://smsw.co.in/API/WebSMS/Http/v1.0a/index.php?
+//username=asepsis&password=4d436c-78a08&sender=ASEPSI to 8707828835 &
+//message=OTP for iWash Hub App Login is 87887 and valid till 5 minutes. Do Not Share This OTP To Anyone. IWASHB
+//&reqid=1&format={json|text&pe_id=1201159146626171588&template_id=1407168933746363488
 
     // Send the OTP
     Uri uri = Uri.parse(url).replace(queryParameters: queryParams);
@@ -74,6 +79,7 @@ class PhoneAuthService {
     // ignore: no_leading_underscores_for_local_identifiers
     final Random _random = Random();
     final int otp = 100000 + _random.nextInt(899999);
+    print(otp);
     return otp.toString();
   }
 }
